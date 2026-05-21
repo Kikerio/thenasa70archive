@@ -39,7 +39,6 @@ window.filterByTag = (tag) => {
     renderFilters();
     renderProjects();
     
-    // Smooth scroll al punto giusto
     const section = document.getElementById('database-section');
     if(section) {
         section.scrollIntoView({ behavior: 'smooth' });
@@ -51,18 +50,17 @@ window.filterByTag = (tag) => {
 // 2. Apertura fluida dai Progetti Correlati (Related Cards)
 window.openRelatedProject = (absoluteIndex) => {
     
-    // 1. Applica la classe fade-out al contenitore principale (CSS: transition opacity)
     if(archiveContainer) {
+        // BLOCCO ALTEZZA: Evita il collasso del DOM e il fastidioso salto in alto!
+        archiveContainer.style.minHeight = archiveContainer.offsetHeight + 'px';
         archiveContainer.classList.add('fade-out');
     }
 
-    // 2. Aspetta 400ms per completare la transizione visiva
     setTimeout(() => {
         const p = projects[absoluteIndex];
         const pTag = p.tags && p.tags.length > 0 ? p.tags[0].toLowerCase() : null;
         const pYear = p.data?.anno || 2026;
         
-        // Reset dei filtri in modo da poter trovare il progetto correlato
         if(state.activeTag && state.activeTag !== pTag) { state.activeTag = null; }
         if(state.activeYear && state.activeYear !== pYear) { state.activeYear = null; }
         if(state.query !== "") { state.query = ""; searchInput.value = ""; }
@@ -70,7 +68,6 @@ window.openRelatedProject = (absoluteIndex) => {
         renderFilters();
         renderProjects(); 
         
-        // Apriamo manualmente il progetto bersaglio
         const safeId = `proj-${absoluteIndex}`;
         const targetRow = document.getElementById(`row-${safeId}`);
         const targetContent = document.getElementById(`content-${safeId}`);
@@ -79,26 +76,19 @@ window.openRelatedProject = (absoluteIndex) => {
             targetRow.classList.add('open');
             targetContent.classList.add('open');
             
-            // --- TRUCCO CINEMATOGRAFICO ---
-            // A. Disattiviamo lo scroll morbido temporaneamente
-            document.documentElement.style.scrollBehavior = 'auto';
+            // Togliamo il blocco altezza ora che il contenuto c'è
+            if(archiveContainer) archiveContainer.style.minHeight = '';
             
-            // B. Calcoliamo la posizione esatta della riga appena aperta (offset per l'header)
+            // Scroll morbido alla nuova riga aperta
             const y = targetRow.getBoundingClientRect().top + window.pageYOffset - 40;
-            
-            // C. Salto istantaneo mentre lo schermo è ancora sfumato
-            window.scrollTo(0, y);
-            
-            // D. Ripristiniamo lo scroll morbido per la navigazione successiva
-            document.documentElement.style.scrollBehavior = 'smooth';
+            window.scrollTo({ top: y, behavior: 'smooth' });
         }
         
-        // 3. Rimuove il fade-out per rivelare il nuovo contenuto GIÀ IN POSIZIONE
         if(archiveContainer) {
             archiveContainer.classList.remove('fade-out');
         }
 
-    }, 400); // 400 millisecondi di delay (coincide col CSS transition)
+    }, 400); 
 };
 
 async function init() {
@@ -111,7 +101,6 @@ async function init() {
         
         let rawProjects = await response.json();
         
-        // ORDINAMENTO: Anno crescente, poi Alfabetico.
         projects = rawProjects.sort((a, b) => {
             const yearA = a.data?.anno || 2026;
             const yearB = b.data?.anno || 2026;
@@ -131,7 +120,6 @@ async function init() {
         setupEventListeners();
         renderProjects();
 
-        // Applica animazione al footer
         const footer = document.querySelector('footer');
         if(footer) {
             footer.classList.add('reveal-hidden');
@@ -187,24 +175,38 @@ function handleSearch(e) {
     renderProjects();
 }
 
-// === FUNZIONE DI APERTURA/CHIUSURA (ACCORDION SINGOLO) ===
+// === FUNZIONE DI APERTURA/CHIUSURA CON SCROLL COMPENSATION ===
 function toggleProject(id) {
     const targetRow = document.getElementById(`row-${id}`);
     const targetContent = document.getElementById(`content-${id}`);
     
-    if (targetRow && targetContent) {
-        // Controlla se la riga che hai appena cliccato è già aperta
-        const isOpen = targetRow.classList.contains('open');
+    if (!targetRow || !targetContent) return;
+
+    const isOpen = targetRow.classList.contains('open');
+    
+    // Controlla se c'è qualcos'altro aperto
+    const openRow = document.querySelector('.archive-row-header.open');
+    const openContent = document.querySelector('.archive-detail-wrapper.open');
+    
+    if (openRow && openContent && openRow !== targetRow) {
+        // Calcola la posizione esatta in cui si trova il mouse PRIMA di chiudere l'altro
+        const rectBefore = targetRow.getBoundingClientRect().top;
         
-        // 1. Forza la chiusura di TUTTI i progetti attualmente aperti
-        document.querySelectorAll('.archive-row-header.open').forEach(el => el.classList.remove('open'));
-        document.querySelectorAll('.archive-detail-wrapper.open').forEach(el => el.classList.remove('open'));
+        openRow.classList.remove('open');
+        openContent.classList.remove('open');
         
-        // 2. Se non era già aperto, lo apriamo. (Se era aperto, rimane chiuso per effetto del punto 1)
-        if (!isOpen) {
-            targetRow.classList.add('open');
-            targetContent.classList.add('open');
-        }
+        // Calcola dove è finita la riga cliccata e compensa lo scarto invisibilmente
+        const rectAfter = targetRow.getBoundingClientRect().top;
+        window.scrollBy(0, rectAfter - rectBefore);
+    }
+    
+    // Infine, apre (o chiude se già aperto) la riga cliccata
+    if (!isOpen) {
+        targetRow.classList.add('open');
+        targetContent.classList.add('open');
+    } else {
+        targetRow.classList.remove('open');
+        targetContent.classList.remove('open');
     }
 }
 
