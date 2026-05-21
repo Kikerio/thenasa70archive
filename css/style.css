@@ -1,0 +1,208 @@
+:root {
+  --background: #ffffff;
+  --foreground: #000000;
+  --row-hover: #f9f9f9;
+  --nasablue: #0b3d91;
+  --nasared: #fc3d21;
+}
+
+/* ==========================================
+   SCROLLBAR E SELEZIONE
+   ========================================== */
+::selection {
+  background: var(--nasared);
+  color: #ffffff !important;
+}
+::-moz-selection {
+  background: var(--nasared);
+  color: #ffffff !important;
+}
+
+html {
+  scrollbar-width: auto;
+  scrollbar-color: var(--foreground) var(--background);
+}
+
+::-webkit-scrollbar {
+  width: 14px;
+  background: var(--background);
+}
+::-webkit-scrollbar-track {
+  background: var(--background);
+  border-left: 1px solid var(--foreground);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--foreground);
+  border: 3px solid var(--background);
+  border-radius: 0px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--nasared);
+}
+
+/* ==========================================
+   ANIMAZIONI APPLE (SCROLL REVEAL)
+   ========================================== */
+.reveal-hidden {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), transform 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+}
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ==========================================
+   STILI COMPONENTI (PILLOLE, TAG, BOTTONI)
+   ========================================== */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: transparent;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.pill-year {
+  border: 1px solid var(--nasablue);
+  color: var(--nasablue);
+}
+.pill-year:hover, .pill-year[data-active="true"] {
+  background: var(--nasablue);
+  color: #ffffff;
+}
+
+.pill-tag {
+  border: 1px solid var(--nasared);
+  color: var(--nasared);
+}
+.pill-tag:hover, .pill-tag[data-active="true"] {
+  background: var(--nasared);
+  color: #ffffff;
+}
+
+.meta-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem 1rem;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: transparent;
+  border: 1px solid var(--foreground);
+  color: var(--foreground);
+  border-radius: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.go-link-btn {
+  display: inline-flex;
+  align-items: center;
+  background: var(--nasablue);
+  color: #ffffff;
+  border: 1px solid var(--nasablue);
+  padding: 0.6rem 1.4rem;
+  border-radius: 999px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.875rem;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  cursor: pointer;
+}
+.go-link-btn:hover {
+  background: #ffffff;
+  color: var(--nasablue);
+}
+
+/* ==========================================
+   GRIGLIA PROGETTI (FILETTI SINGOLI)
+   ========================================== */
+.archive-row-header {
+  width: 100%;
+  text-align: left;
+  padding: 1.5rem 1.5rem;
+  cursor: pointer;
+  background-color: var(--background);
+  color: var(--foreground);
+  border-bottom: 1px solid var(--foreground);
+  position: relative;
+  z-index: 2;
+  transition: background-color 0.3s ease;
+}
+.archive-row-header:hover {
+  background-color: var(--row-hover);
+}
+
+.archive-thumb {
+  width: 100%;
+  aspect-ratio: 1/1;
+  background-size: cover;
+  background-position: center;
+  display: block;
+  border: 1px solid var(--foreground);
+}
+
+.archive-arrow {
+  display: inline-block;
+  transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  margin-left: auto;
+}
+
+/* RIGA ATTIVA */
+.archive-row-header.open {
+  background-color: var(--nasablue);
+  color: #ffffff;
+  border-bottom: 1px solid var(--nasablue);
+}
+.archive-row-header.open .archive-thumb {
+  border-color: #ffffff;
+}
+.archive-row-header.open .archive-arrow {
+  transform: rotate(180deg);
+}
+.archive-row-header.open .pill-tag {
+  background-color: #ffffff;
+  border-color: var(--nasared);
+  color: var(--nasared);
+}
+
+/* FISARMONICA (ESPANSIONE) */
+.archive-detail-wrapper {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+  background-color: var(--background);
+  color: var(--foreground);
+}
+.archive-detail-wrapper.open {
+  grid-template-rows: 1fr;
+}
+.archive-detail-inner {
+  overflow: hidden;
+  min-height: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.archive-detail-wrapper.open .archive-detail-inner {
+  opacity: 1;
+  transition: opacity 0.5s ease 0.2s;
+}
+
+/* Rimuove il bordo inferiore dall'ultimo elemento della lista */
+.last-project-border {
+  border-bottom: none !important;
+}

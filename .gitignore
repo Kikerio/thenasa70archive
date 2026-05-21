@@ -1,0 +1,6 @@
+# macOS system files
+._*
+.DS_Store
+
+# node_modules (se in futuro userai npm)
+node_modules/

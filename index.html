@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NASA 70 — Archive Terminal</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              background: "#ffffff",
+              foreground: "#000000",
+              nasablue: "#0b3d91",
+              nasared: "#fc3d21",
+              sysgray: "#f4f4f4"
+            },
+            fontFamily: {
+              mono: ['"JetBrains Mono"', 'monospace'],
+              sans: ['"JetBrains Mono"', 'monospace'],
+            }
+          }
+        }
+      }
+    </script>
+    
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        .archive-grid-layout {
+            display: grid !important;
+            grid-template-columns: 40px 100px 1fr 200px 140px 220px 30px !important;
+            align-items: center;
+            gap: 1.5rem; 
+        }
+        @media (max-width: 1024px) {
+            .archive-grid-layout { grid-template-columns: 40px 80px 1fr 150px 100px 160px 20px !important; gap: 1.5rem; }
+        }
+        @media (max-width: 768px) {
+            .archive-grid-layout { grid-template-columns: 30px 60px 1fr 20px !important; gap: 1.5rem; }
+            .archive-grid-layout .col-author, 
+            .archive-grid-layout .col-date, 
+            .archive-grid-layout .col-tag { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-background text-foreground font-mono antialiased text-sm">
+
+    <header class="border-b border-foreground flex flex-col md:flex-row items-stretch bg-background">
+        <div class="w-full md:w-auto md:h-48 md:aspect-square shrink-0 border-b md:border-b-0 md:border-r border-foreground p-6 flex justify-center items-center bg-background">
+            <img src="assets/logo.png" alt="NASA 70" class="h-32 md:h-40 w-auto object-contain">
+        </div>
+        <div class="flex-1 p-6 flex flex-col justify-center bg-background">
+            <div class="text-sm font-bold mb-3 uppercase text-foreground">
+                Scope & Purpose
+            </div>
+            <p class="text-sm leading-relaxed text-justify hyphens-auto text-foreground" lang="en">
+                A <span class="font-bold">student-built</span>, ever-expanding digital archive celebrating <span class="font-bold">NASA 70</span> — seven decades of aerospace research from 1958 to 2028. It gathers the interactive projects produced by students of the <span class="font-bold">Interaction Design course</span> at <span class="font-bold">SUPSI</span>, starting with the first thirteen from <span class="font-bold">2026</span> and growing each year as the project will continue.
+            </p>
+        </div>
+    </header>
+
+    <section class="border-b border-foreground bg-foreground flex items-center px-6 py-6">
+        <div class="font-bold tracking-widest shrink-0 mr-6 flex items-center gap-2 uppercase text-sm text-background">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            Search
+        </div>
+        <input type="text" id="search-input" placeholder="Title, author, or keyword..." class="flex-1 bg-transparent outline-none border-none text-sm font-mono placeholder:text-gray-500 text-background w-full">
+    </section>
+
+    <div class="flex flex-col md:flex-row border-b border-foreground bg-background">
+        <section class="w-full md:w-1/2 p-6 border-b md:border-b-0 md:border-r border-foreground">
+            <div class="text-sm font-bold tracking-widest mb-4 uppercase text-foreground">Timeframe (Year)</div>
+            <div id="years-container" class="flex flex-wrap gap-2"></div>
+        </section>
+        
+        <section class="w-full md:w-1/2 p-6">
+            <div class="text-sm font-bold tracking-widest mb-4 uppercase text-foreground">Classification (Category)</div>
+            <div id="tags-container" class="flex flex-wrap gap-2"></div>
+        </section>
+    </div>
+
+    <section class="px-6 py-6 flex justify-between text-sm font-bold tracking-widest bg-foreground text-background uppercase">
+        <div id="showing-text">SHOWING 0 / 0</div>
+        <div id="active-filters-text">ALL CATEGORIES · ALL YEARS</div>
+    </section>
+
+    <div class="archive-grid-layout border-b border-foreground px-6 py-6 text-sm font-bold tracking-widest bg-background uppercase text-foreground">
+        <span class="col-num">№</span>
+        <span class="col-thumb">IMG_DATA</span>
+        <span class="col-title">PROJECT_TITLE</span>
+        <span class="col-author">OPERATIVE</span>
+        <span class="col-date">TIMESTAMP</span>
+        <span class="col-tag">CLASSIFICATION</span>
+        <span class="col-arrow"></span>
+    </div>
+
+    <main id="archive-container" class="flex flex-col bg-background"></main>
+
+    <footer class="p-12 grid grid-cols-1 md:grid-cols-4 gap-6 bg-foreground text-sm uppercase text-background">
+        <div>
+            <div class="font-bold mb-1 text-background">System</div>
+            <div class="tracking-widest font-bold">THE NASA 70 ARCHIVE</div>
+        </div>
+        <div>
+            <div class="font-bold mb-1 text-background">Origin</div>
+            <div class="tracking-widest font-bold">INTERACTION MEDIA DESIGN - SUPSI DACD</div>
+        </div>
+        <div>
+            <div class="font-bold mb-1 text-background">Build</div>
+            <div class="tracking-widest font-bold">2026 ©</div>
+        </div>
+        <div>
+            <div class="font-bold mb-1 text-background">Status</div>
+            <div class="tracking-widest font-bold">ACTIVE / GROWING_YEARLY</div>
+        </div>
+    </footer>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
