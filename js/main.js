@@ -38,41 +38,67 @@ window.filterByTag = (tag) => {
     state.query = "";
     renderFilters();
     renderProjects();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    
+    // Smooth scroll al punto giusto
+    const section = document.getElementById('database-section');
+    if(section) {
+        section.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
 };
 
 // 2. Apertura fluida dai Progetti Correlati (Related Cards)
 window.openRelatedProject = (absoluteIndex) => {
     
-    const p = projects[absoluteIndex];
-    const pTag = p.tags && p.tags.length > 0 ? p.tags[0].toLowerCase() : null;
-    const pYear = p.data?.anno || 2026;
-    
-    let needsRender = false;
-    if(state.activeTag && state.activeTag !== pTag) { state.activeTag = null; needsRender = true; }
-    if(state.activeYear && state.activeYear !== pYear) { state.activeYear = null; needsRender = true; }
-    if(state.query !== "") { state.query = ""; searchInput.value = ""; needsRender = true; }
-    
-    renderFilters();
-    renderProjects(); 
-    
-    // Apriamo manualmente il progetto bersaglio
-    const safeId = `proj-${absoluteIndex}`;
-    const targetRow = document.getElementById(`row-${safeId}`);
-    const targetContent = document.getElementById(`content-${safeId}`);
-    
-    if(targetRow && targetContent) {
-        targetRow.classList.add('open');
-        targetContent.classList.add('open');
+    // 1. Applica la classe fade-out al contenitore principale (CSS: transition opacity)
+    if(archiveContainer) {
+        archiveContainer.classList.add('fade-out');
     }
-    
-    // Scrolliamo verso il nuovo progetto aperto
+
+    // 2. Aspetta 400ms per completare la transizione visiva
     setTimeout(() => {
-        if(targetRow) {
+        const p = projects[absoluteIndex];
+        const pTag = p.tags && p.tags.length > 0 ? p.tags[0].toLowerCase() : null;
+        const pYear = p.data?.anno || 2026;
+        
+        // Reset dei filtri in modo da poter trovare il progetto correlato
+        if(state.activeTag && state.activeTag !== pTag) { state.activeTag = null; }
+        if(state.activeYear && state.activeYear !== pYear) { state.activeYear = null; }
+        if(state.query !== "") { state.query = ""; searchInput.value = ""; }
+        
+        renderFilters();
+        renderProjects(); 
+        
+        // Apriamo manualmente il progetto bersaglio
+        const safeId = `proj-${absoluteIndex}`;
+        const targetRow = document.getElementById(`row-${safeId}`);
+        const targetContent = document.getElementById(`content-${safeId}`);
+        
+        if(targetRow && targetContent) {
+            targetRow.classList.add('open');
+            targetContent.classList.add('open');
+            
+            // --- TRUCCO CINEMATOGRAFICO ---
+            // A. Disattiviamo lo scroll morbido temporaneamente
+            document.documentElement.style.scrollBehavior = 'auto';
+            
+            // B. Calcoliamo la posizione esatta della riga appena aperta (offset per l'header)
             const y = targetRow.getBoundingClientRect().top + window.pageYOffset - 40;
-            window.scrollTo({ top: y, behavior: 'smooth' });
+            
+            // C. Salto istantaneo mentre lo schermo è ancora sfumato
+            window.scrollTo(0, y);
+            
+            // D. Ripristiniamo lo scroll morbido per la navigazione successiva
+            document.documentElement.style.scrollBehavior = 'smooth';
         }
-    }, 150);
+        
+        // 3. Rimuove il fade-out per rivelare il nuovo contenuto GIÀ IN POSIZIONE
+        if(archiveContainer) {
+            archiveContainer.classList.remove('fade-out');
+        }
+
+    }, 400); // 400 millisecondi di delay (coincide col CSS transition)
 };
 
 async function init() {
@@ -161,19 +187,26 @@ function handleSearch(e) {
     renderProjects();
 }
 
-// === FUNZIONE DI APERTURA/CHIUSURA COMPLETAMENTE RISCRITTA E STABILIZZATA ===
+// === FUNZIONE DI APERTURA/CHIUSURA (ACCORDION SINGOLO) ===
 function toggleProject(id) {
-    const row = document.getElementById(`row-${id}`);
-    const content = document.getElementById(`content-${id}`);
+    const targetRow = document.getElementById(`row-${id}`);
+    const targetContent = document.getElementById(`content-${id}`);
     
-    if (row && content) {
-        row.classList.toggle('open');
-        content.classList.toggle('open');
+    if (targetRow && targetContent) {
+        // Controlla se la riga che hai appena cliccato è già aperta
+        const isOpen = targetRow.classList.contains('open');
+        
+        // 1. Forza la chiusura di TUTTI i progetti attualmente aperti
+        document.querySelectorAll('.archive-row-header.open').forEach(el => el.classList.remove('open'));
+        document.querySelectorAll('.archive-detail-wrapper.open').forEach(el => el.classList.remove('open'));
+        
+        // 2. Se non era già aperto, lo apriamo. (Se era aperto, rimane chiuso per effetto del punto 1)
+        if (!isOpen) {
+            targetRow.classList.add('open');
+            targetContent.classList.add('open');
+        }
     }
-    // Nessun auto-scroll o riposizionamento forzato. 
-    // Si apre esattamente dove hai cliccato!
 }
-// ==============================================================================
 
 function renderProjects() {
     if(!archiveContainer) return;
@@ -240,7 +273,7 @@ function renderProjects() {
                     : "Descrizione non disponibile...";
                 
                 return `
-                <div class="group border border-foreground flex flex-col cursor-pointer bg-background hover:bg-gray-50 transition-colors duration-300" onclick="window.openRelatedProject(${rpIndex})">
+                <div class="group border border-foreground flex flex-col cursor-pointer bg-background hover:bg-sysgray transition-colors duration-300" onclick="window.openRelatedProject(${rpIndex})">
                     <div class="p-4 flex flex-col gap-4 h-full">
                         <div class="w-full aspect-square border border-foreground bg-cover bg-center block group-hover:hidden" style="background-image: url('${rpImg}')"></div>
                         
