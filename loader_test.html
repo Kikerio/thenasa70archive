@@ -31,7 +31,8 @@
             background-color: #ffffff;
             z-index: 9999;
             display: flex; justify-content: center; align-items: center;
-            animation: hidePreloaderBackground 1.5s var(--ease-extreme) 7s forwards;
+            /* Ridotto da 7s a 4s */
+            animation: hidePreloaderBackground 1.5s var(--ease-extreme) 4s forwards;
         }
 
         /* --- CONTENITORE DEL LOGO --- */
@@ -39,7 +40,8 @@
             position: relative; width: 500px; height: 500px;
             display: flex; justify-content: center; align-items: center;
             transform: translateY(-20px); 
-            animation: shrinkAndMoveLogo 1.5s var(--ease-extreme) 7s forwards;
+            /* Ridotto da 7s a 4s */
+            animation: shrinkAndMoveLogo 1.5s var(--ease-extreme) 4s forwards;
         }
 
         /* --- LOGO ANIMATION --- */
@@ -67,44 +69,6 @@
         .sette { clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%); transform: translateX(-40%); animation: slideFromLeft 1.2s var(--ease-extreme) 1.8s forwards; }
         .zero { clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%); transform: translateX(40%); animation: slideFromRight 1.2s var(--ease-extreme) 1.8s forwards; }
 
-        /* --- CONTENITORE TESTO TELEPROMPTER --- */
-        .teleprompter-container {
-            position: absolute;
-            bottom: 6%; 
-            
-            /* CENTRATURA PERFETTA DEL BLOCCO */
-            left: 50%;
-            transform: translateX(-50%);
-            
-            width: 90%; /* Sfrutta quasi tutta la giustezza della pagina */
-            max-width: 1400px; /* Limite per schermi ultra-wide */
-            
-            /* Testo centrato */
-            text-align: center; 
-            
-            animation: fadeOutText 0.5s var(--ease-extreme) 6.5s forwards; 
-        }
-
-        .teleprompter-text {
-            font-size: clamp(20px, 2.8vw, 50px); 
-            line-height: 1.4;
-            color: #000000;
-            font-weight: 700; /* Font pesante */
-            text-wrap: balance;
-        }
-
-        /* Classi colore NASA */
-        .nasa-red { color: var(--nasa-red); }
-        .nasa-blue { color: var(--nasa-blue); }
-
-        .reveal-word {
-            opacity: 0;
-            display: inline-block;
-            transform: translateY(10px);
-            will-change: transform, opacity;
-            animation: wordFadeUp 0.6s var(--ease-extreme) forwards;
-        }
-
         /* --- KEYFRAMES --- */
         @keyframes shieldEntrance { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
@@ -112,17 +76,6 @@
         @keyframes slideFromLeft { from { opacity: 0; transform: translateX(-40%); } to { opacity: 1; transform: translateX(0); } }
         @keyframes slideFromRight { from { opacity: 0; transform: translateX(40%); } to { opacity: 1; transform: translateX(0); } }
         
-        @keyframes wordFadeUp { to { opacity: 1; transform: translateY(0); } }
-        
-        /* Aggiornato: mantiene il translate(-50%) per non far scattare il blocco quando svanisce */
-        @keyframes fadeOutText { 
-            to { 
-                opacity: 0; 
-                transform: translate(-50%, -10px); 
-                visibility: hidden; 
-            } 
-        }
-
         @keyframes shrinkAndMoveLogo {
             0% { transform: scale(1) translateY(-20px); }
             100% { transform: scale(0.2) translateY(-45vh); opacity: 0; } 
@@ -132,6 +85,7 @@
             100% { background-color: rgba(255, 255, 255, 0); visibility: hidden; }
         }
 
+        /* Testo provvisorio per farti vedere cosa succede dopo il loader */
         .fake-site-content {
             font-family: sans-serif; font-size: 2rem; color: #999; text-align: center; margin-top: 20%;
         }
@@ -142,7 +96,6 @@
     <div class="fake-site-content">Il Loader scomparirà e vedrai questo.</div>
 
     <div id="preloader">
-        
         <div class="logo-container-loader">
             <div class="shield-wrapper">
                 <img src="assets/logo_parts/sfondo.png" class="base-sfondo" alt="Sfondo Blu">
@@ -155,52 +108,7 @@
                 </div>
             </div>
         </div>
-
-        <div class="teleprompter-container">
-            <div id="source-text" style="display: none;">
-                A student-built, ever-expanding digital archive celebrating <strong class="nasa-red">NASA 70</strong> — seven decades of aerospace research from <strong class="nasa-blue">1958 to 2028</strong>. It gathers the interactive projects produced by students of the <strong class="nasa-blue">Interaction Design</strong> course (CV429.01) at <strong class="nasa-red">SUPSI</strong>, starting with the first thirteen from 2026 and growing each year as the project will continue.
-            </div>
-            
-            <div class="teleprompter-text" id="typewriter-text"></div>
-        </div>
-
     </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const textContainer = document.getElementById('typewriter-text');
-            const sourceNodes = document.getElementById('source-text').childNodes;
-            
-            let delayCount = 0;
-            
-            sourceNodes.forEach(node => {
-                if (node.nodeType === Node.TEXT_NODE) {
-                    const words = node.textContent.trim().split(/\s+/);
-                    words.forEach(word => {
-                        if(!word) return;
-                        const span = document.createElement('span');
-                        span.innerHTML = word + '&nbsp;';
-                        span.className = 'reveal-word';
-                        span.style.animationDelay = `${2.8 + (delayCount * 0.06)}s`;
-                        textContainer.appendChild(span);
-                        delayCount++;
-                    });
-                } 
-                else if (node.nodeType === Node.ELEMENT_NODE) {
-                    const words = node.textContent.trim().split(/\s+/);
-                    words.forEach(word => {
-                        if(!word) return;
-                        const span = document.createElement('span');
-                        span.innerHTML = word + '&nbsp;';
-                        span.className = `reveal-word ${node.className}`;
-                        span.style.animationDelay = `${2.8 + (delayCount * 0.06)}s`;
-                        textContainer.appendChild(span);
-                        delayCount++;
-                    });
-                }
-            });
-        });
-    </script>
 
 </body>
 </html>

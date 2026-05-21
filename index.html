@@ -7,7 +7,7 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -33,12 +33,51 @@
     <link rel="stylesheet" href="css/style.css">
 
     <style>
+        :root {
+            --background: #ffffff;
+            --foreground: #000000;
+            --ease-extreme: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-fade: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- STILI TAG & UI --- */
+        .tag-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 18px; 
+            font-size: 0.875rem;
+            text-transform: uppercase; 
+            font-weight: 300; 
+            border: 1px solid var(--foreground);
+            border-radius: 9999px;
+            background-color: var(--background);
+            color: var(--foreground);
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .tag-pill:hover, .tag-pill.active {
+            background-color: var(--foreground);
+            color: var(--background); 
+        }
+
+        /* --- LAYOUT GRID ARCHIVIO --- */
         .archive-grid-layout {
             display: grid !important;
             grid-template-columns: 40px 100px 1fr 200px 140px 220px 30px !important;
             align-items: center;
             gap: 1.5rem; 
         }
+        
+        /* CENTRATURA DELLE COLONNE SPECIFICHE */
+        .archive-grid-layout .col-author,
+        .archive-grid-layout .col-date,
+        .archive-grid-layout .col-tag {
+            text-align: center;
+            justify-self: center;
+            width: 100%;
+        }
+
         @media (max-width: 1024px) {
             .archive-grid-layout { grid-template-columns: 40px 80px 1fr 150px 100px 160px 20px !important; gap: 1.5rem; }
         }
@@ -48,16 +87,111 @@
             .archive-grid-layout .col-date, 
             .archive-grid-layout .col-tag { display: none !important; }
         }
+
+        /* --- BLOCCO SCROLL DURANTE IL LOADER --- */
+        body {
+            overflow: hidden; 
+            animation: restoreScroll 0.1s linear 4.8s forwards;
+        }
+        @keyframes restoreScroll {
+            to { overflow: auto; overflow-x: hidden; }
+        }
+
+        /* --- FASE 2: FADE OUT DEL BACKGROUND BIANCO --- */
+        #preloader {
+            position: fixed; inset: 0;
+            background-color: var(--background);
+            z-index: 9999;
+            display: flex; justify-content: center; align-items: center;
+            animation: fadeOutPreloader 0.8s var(--ease-fade) 4.0s forwards;
+        }
+        @keyframes fadeOutPreloader {
+            to { opacity: 0; visibility: hidden; pointer-events: none; }
+        }
+
+        /* --- FASE 1: FADE OUT DEL LOGO --- */
+        .logo-container-loader {
+            position: relative; width: 500px; height: 500px;
+            display: flex; justify-content: center; align-items: center;
+            animation: fadeOutLogo 0.5s ease-in-out 3.5s forwards;
+        }
+        @keyframes fadeOutLogo {
+            to { opacity: 0; transform: scale(0.95); } 
+        }
+
+        /* --- STRUTTURA BASE DEL LOGO --- */
+        .shield-wrapper {
+            position: relative; width: 100%; height: 100%;
+            opacity: 1; transform: scale(1);
+            will-change: transform, opacity;
+        }
+        .base-sfondo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; }
+        .masked-elements {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            -webkit-mask-image: url('assets/logo_parts/sfondo.png');
+            -webkit-mask-size: contain; -webkit-mask-position: center; -webkit-mask-repeat: no-repeat;
+            mask-image: url('assets/logo_parts/sfondo.png');
+            mask-size: contain; mask-position: center; mask-repeat: no-repeat;
+        }
+        .element {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: contain; opacity: 1; transform: translate(0);
+            will-change: transform, opacity;
+        }
+        .sette { clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%); }
+        .zero { clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%); }
+
+        /* --- CLASSI MOTORE DELLE ANIMAZIONI --- */
+        .boot-anim.shield-wrapper { animation: shieldEntrance 1.5s var(--ease-extreme) both; }
+        .boot-anim .razzo, .loop-anim .razzo { animation: slideUp 1.5s var(--ease-extreme) 0.4s both; }
+        .boot-anim .nasa, .loop-anim .nasa { animation: fadeUp 1.2s var(--ease-extreme) 1.2s both; }
+        .boot-anim .date, .loop-anim .date { animation: fadeUp 1.2s var(--ease-extreme) 1.4s both; }
+        .boot-anim .sette, .loop-anim .sette { animation: slideFromLeft 1.2s var(--ease-extreme) 1.8s both; }
+        .boot-anim .zero, .loop-anim .zero { animation: slideFromRight 1.2s var(--ease-extreme) 1.8s both; }
+
+        @keyframes shieldEntrance { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideFromLeft { from { opacity: 0; transform: translateX(-40%); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideFromRight { from { opacity: 0; transform: translateX(40%); } to { opacity: 1; transform: translateX(0); } }
+
     </style>
 </head>
 <body class="bg-background text-foreground font-mono antialiased text-sm">
 
+    <div id="preloader">
+        <div class="logo-container-loader">
+            <div class="shield-wrapper boot-anim">
+                <img src="assets/logo_parts/sfondo.png" class="base-sfondo" alt="Sfondo Blu">
+                <div class="masked-elements">
+                    <img src="assets/logo_parts/razzo.png" class="element razzo" alt="Razzo">
+                    <img src="assets/logo_parts/nasa.png" class="element nasa" alt="Logo NASA">
+                    <img src="assets/logo_parts/date.png" class="element date" alt="Date">
+                    <img src="assets/logo_parts/70.png" class="element sette" alt="Numero 7">
+                    <img src="assets/logo_parts/70.png" class="element zero" alt="Numero 0">
+                </div>
+            </div>
+        </div>
+    </div>
     <header class="border-b border-foreground flex flex-col md:flex-row items-stretch bg-background">
         <div class="w-full md:w-auto md:h-48 md:aspect-square shrink-0 border-b md:border-b-0 md:border-r border-foreground p-6 flex justify-center items-center bg-background">
-            <img src="assets/logo.png" alt="NASA 70" class="h-32 md:h-40 w-auto object-contain">
+            
+            <div class="w-[128px] h-[128px] md:w-[160px] md:h-[160px] relative">
+                <div class="shield-wrapper" id="header-animated-logo">
+                    <img src="assets/logo_parts/sfondo.png" class="base-sfondo" alt="Sfondo Blu">
+                    <div class="masked-elements">
+                        <img src="assets/logo_parts/razzo.png" class="element razzo" alt="Razzo">
+                        <img src="assets/logo_parts/nasa.png" class="element nasa" alt="Logo NASA">
+                        <img src="assets/logo_parts/date.png" class="element date" alt="Date">
+                        <img src="assets/logo_parts/70.png" class="element sette" alt="Numero 7">
+                        <img src="assets/logo_parts/70.png" class="element zero" alt="Numero 0">
+                    </div>
+                </div>
+            </div>
+
         </div>
         <div class="flex-1 p-6 flex flex-col justify-center bg-background">
-            <div class="text-sm font-bold mb-3 uppercase text-foreground">
+            <div class="text-sm uppercase font-light tracking-widest mb-3 text-foreground">
                 Scope & Purpose
             </div>
             <p class="text-sm leading-relaxed text-justify hyphens-auto text-foreground" lang="en">
@@ -67,36 +201,36 @@
     </header>
 
     <section class="border-b border-foreground bg-foreground flex items-center px-6 py-6">
-        <div class="font-bold tracking-widest shrink-0 mr-6 flex items-center gap-2 uppercase text-sm text-background">
+        <div class="font-light tracking-widest shrink-0 mr-6 flex items-center gap-2 uppercase text-sm text-background">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             Search
         </div>
-        <input type="text" id="search-input" placeholder="Title, author, or keyword..." class="flex-1 bg-transparent outline-none border-none text-sm font-mono placeholder:text-gray-500 text-background w-full">
+        <input type="text" id="search-input" placeholder="Title, author, or keyword..." class="flex-1 bg-transparent outline-none border-none text-sm font-mono placeholder:text-gray-500 text-background w-full uppercase font-light">
     </section>
 
     <div class="flex flex-col md:flex-row border-b border-foreground bg-background">
         <section class="w-full md:w-1/2 p-6 border-b md:border-b-0 md:border-r border-foreground">
-            <div class="text-sm font-bold tracking-widest mb-4 uppercase text-foreground">Timeframe (Year)</div>
+            <div class="text-sm font-light tracking-widest mb-4 uppercase text-foreground">Timeframe (Year)</div>
             <div id="years-container" class="flex flex-wrap gap-2"></div>
         </section>
         
         <section class="w-full md:w-1/2 p-6">
-            <div class="text-sm font-bold tracking-widest mb-4 uppercase text-foreground">Classification (Category)</div>
+            <div class="text-sm font-light tracking-widest mb-4 uppercase text-foreground">Classification (Category)</div>
             <div id="tags-container" class="flex flex-wrap gap-2"></div>
         </section>
     </div>
 
-    <section class="px-6 py-6 flex justify-between text-sm font-bold tracking-widest bg-foreground text-background uppercase">
+    <section class="px-6 py-6 flex justify-between text-sm font-light tracking-widest bg-foreground text-background uppercase border-b border-foreground">
         <div id="showing-text">SHOWING 0 / 0</div>
         <div id="active-filters-text">ALL CATEGORIES · ALL YEARS</div>
     </section>
 
-    <div class="archive-grid-layout border-b border-foreground px-6 py-6 text-sm font-bold tracking-widest bg-background uppercase text-foreground">
+    <div class="archive-grid-layout border-b border-foreground px-6 py-6 text-sm font-light tracking-widest bg-background uppercase text-foreground">
         <span class="col-num">№</span>
         <span class="col-thumb">IMG_DATA</span>
         <span class="col-title">PROJECT_TITLE</span>
-        <span class="col-author">OPERATIVE</span>
-        <span class="col-date">TIMESTAMP</span>
+        <span class="col-author">AUTHOR</span>
+        <span class="col-date">DATE</span>
         <span class="col-tag">CLASSIFICATION</span>
         <span class="col-arrow"></span>
     </div>
@@ -105,23 +239,37 @@
 
     <footer class="p-12 grid grid-cols-1 md:grid-cols-4 gap-6 bg-foreground text-sm uppercase text-background">
         <div>
-            <div class="font-bold mb-1 text-background">System</div>
+            <div class="font-light mb-1 text-background">System</div>
             <div class="tracking-widest font-bold">THE NASA 70 ARCHIVE</div>
         </div>
         <div>
-            <div class="font-bold mb-1 text-background">Origin</div>
+            <div class="font-light mb-1 text-background">Origin</div>
             <div class="tracking-widest font-bold">INTERACTION MEDIA DESIGN - SUPSI DACD</div>
         </div>
         <div>
-            <div class="font-bold mb-1 text-background">Build</div>
+            <div class="font-light mb-1 text-background">Build</div>
             <div class="tracking-widest font-bold">2026 ©</div>
         </div>
         <div>
-            <div class="font-bold mb-1 text-background">Status</div>
+            <div class="font-light mb-1 text-background">Status</div>
             <div class="tracking-widest font-bold">ACTIVE / GROWING_YEARLY</div>
         </div>
     </footer>
 
     <script type="module" src="js/main.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const headerLogo = document.getElementById('header-animated-logo');
+            
+            setTimeout(() => {
+                setInterval(() => {
+                    headerLogo.classList.remove('loop-anim');
+                    void headerLogo.offsetWidth;
+                    headerLogo.classList.add('loop-anim');
+                }, 12000); 
+            }, 7000); 
+        });
+    </script>
 </body>
 </html>
