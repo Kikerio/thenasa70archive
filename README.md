@@ -26,7 +26,7 @@ L'architettura dell'interfaccia si articola in quattro macro-aree interconnesse 
 3. **Inspector Drawer Responsivo:** Posizionato a destra, agisce come un pannello informativo profondo. Al click su una barra della timeline o su una riga della tabella, il drawer si popola fluidamente applicando una transizione verticale d'ingresso e mostrando i metadati completi, la sinossi descrittiva, i tag di sistema, l'anteprima visiva del progetto e la *Call to Action* "OPEN LINK" per accedere all'applicazione esterna.
 4. **Data Density Map (Footer):** La sezione inferiore calcola e visualizza in tempo reale un grafico della densità dei dati basato sul numero di progetti attivi per ciascun segmento temporale, offrendo una mappa visiva immediata di quali ere storiche siano state maggiormente investigate dai ricercatori.
 
-<video src="assets/imgs/70_archive.mov)" width="100%" controls></video>
+<video src="assets/imgs/70_archive.mov" width="100%" controls></video>
 ![Dettagli](assets/imgs/01_70.png)
 ![Dettagli](assets/imgs/02_70.png)
 !![Dettagli](assets/imgs/03_70.png)
