@@ -26,11 +26,13 @@ L'architettura dell'interfaccia si articola in quattro macro-aree interconnesse 
 3. **Inspector Drawer Responsivo:** Posizionato a destra, agisce come un pannello informativo profondo. Al click su una barra della timeline o su una riga della tabella, il drawer si popola fluidamente applicando una transizione verticale d'ingresso e mostrando i metadati completi, la sinossi descrittiva, i tag di sistema, l'anteprima visiva del progetto e la *Call to Action* "OPEN LINK" per accedere all'applicazione esterna.
 4. **Data Density Map (Footer):** La sezione inferiore calcola e visualizza in tempo reale un grafico della densità dei dati basato sul numero di progetti attivi per ciascun segmento temporale, offrendo una mappa visiva immediata di quali ere storiche siano state maggiormente investigate dai ricercatori.
 
-<video src="assets/imgs/70_archive.mp4" width="100%" controls></video>
+[INCOLLA QUI IL LINK DEL VIDEO GENERATO DA GITHUB TRASCINANDO IL FILE .MP4]
+
 ![Dettagli](assets/imgs/01_70.png)
 ![Dettagli](assets/imgs/02_70.png)
-!![Dettagli](assets/imgs/03_70.png)
+![Dettagli](assets/imgs/03_70.png)
 ![Dettagli](assets/imgs/04_70.png)
+
 
 ## Tecnologia usata
 La piattaforma è ingegnerizzata utilizzando un'architettura front-end standard, pulita e priva di sovrastrutture computazionali esterne. Il layout semantico è strutturato in HTML5 e stilizzato in CSS3 tramite un sistema rigoroso di CSS Variables per la gestione dei vettori spaziali di layout e dei codici colore istituzionali. La logica matematica di posizionamento spaziale, la gestione dello zoom dinamico del viewport e il motore di filtraggio combinatorio sincrono (testo + intervallo temporale + categorie) sono scritti in JavaScript nativo, supportati dall'integrazione di *Lucide Icons* per la gestione della libreria di icone vettoriali. Il database dell'archivio è memorizzato in un array JSON immutabile composto da oggetti strutturati; una funzione di mappatura matematica traduce gli anni di inizio e fine dei progetti in coordinate pixel precise sul piano cartesiano (`getX()`), calcolando in tempo reale le sfumature e le collisioni di layout all'interno del DOM.
@@ -89,8 +91,3 @@ function getX(year) {
     const origin = ARCHIVE_SETTINGS.coordinateSpace.startYear;
     return (((year - origin) / timeSpan) * currentTotalWidth) + paddingGlobal; 
 }
-```
-
-
-## Target e contesto d’uso
-Il target di riferimento è altamente specialistico ed è focalizzato su ricercatori scientifici, interaction designer, studenti accademici e professionisti della comunicazione visiva interessati a comprendere la complessità dei progetti spaziali correlati alla NASA. L'ecosistema è ottimizzato per una fruizione desktop ad alta concentrazione di dati, configurandosi come uno strumento di lavoro, consultazione e analisi comparativa. Trova la sua perfetta collocazione all'interno di laboratori di design, portali istituzionali di archiviazione accademica o postazioni di lavoro dedicate all'analisi di sistemi informativi complessi (*Information Visualization*).
