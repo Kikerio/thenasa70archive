@@ -6,7 +6,7 @@ Progetto 2: La conquista dello spazio
 
 # NASA 70 — Precision Data Archive
 Autore: Michelle Chicherio \
-[NASA 70 — Precision Data Archive](https://kikerio.github.io/nasa70-archive/)
+[NASA 70 — Precision Data Archive](https://kikerio.github.io/thenasa70archive/)
 
 
 ## Introduzione e tema
