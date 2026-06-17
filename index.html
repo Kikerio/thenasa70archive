@@ -1,308 +1,881 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NASA 70 — Archive Terminal</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NASA 70 — Precision Data Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    /* ==========================================================================
+       RESET & BASE (SWISS GRID)
+       ========================================================================== */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+    body {
+      background-color: #ffffff; color: #000000;
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      height: 100vh; overflow: hidden; padding: 24px;
+      display: flex; -webkit-font-smoothing: antialiased;
+    }
+
+    .title-large { font-size: 20px; font-weight: 700; text-transform: uppercase; line-height: 1.2; letter-spacing: -0.5px; }
+    .uppercase { text-transform: uppercase; }
+    .bold { font-weight: 700; }
+    ::-webkit-scrollbar { width: 0px; height: 0px; }
+
+    /* ==========================================================================
+       PRELOADER ANIMATION
+       ========================================================================== */
+    #preloader {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background-color: #ffffff;
+      z-index: 9999;
+      display: flex; justify-content: center; align-items: center;
+      animation: hidePreloaderBackground 1.2s cubic-bezier(0.16, 1, 0.3, 1) 4s forwards;
+    }
+
+    .logo-container-loader {
+      position: relative; width: 420px; height: 420px;
+      display: flex; justify-content: center; align-items: center;
+      animation: shrinkAndMoveLogo 1.2s cubic-bezier(0.16, 1, 0.3, 1) 4s forwards;
+    }
+
+    .shield-wrapper {
+      position: relative; width: 100%; height: 100%;
+      opacity: 0; transform: scale(0.85);
+      animation: shieldEntrance 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      will-change: transform, opacity;
+    }
+
+    .base-sfondo {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain;
+    }
+
+    .masked-elements {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      -webkit-mask-image: url('assets/imgs/logo_parts/sfondo.png');
+      -webkit-mask-size: contain; -webkit-mask-position: center; -webkit-mask-repeat: no-repeat;
+      mask-image: url('assets/imgs/logo_parts/sfondo.png');
+      mask-size: contain; mask-position: center; mask-repeat: no-repeat;
+    }
+
+    .logo-element {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: contain; opacity: 0; will-change: transform, opacity;
+    }
+
+    .razzo  { transform: translateY(100%);  animation: slideUp        1.5s cubic-bezier(0.16,1,0.3,1) 0.4s forwards; }
+    .nasa   { transform: translateY(15px);  animation: fadeUp         1.2s cubic-bezier(0.16,1,0.3,1) 1.2s forwards; }
+    .date-l { transform: translateY(15px);  animation: fadeUp         1.2s cubic-bezier(0.16,1,0.3,1) 1.4s forwards; }
+    .sette  { clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%);  transform: translateX(-40%); animation: slideFromLeft  1.2s cubic-bezier(0.16,1,0.3,1) 1.8s forwards; }
+    .zero   { clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%); transform: translateX(40%);  animation: slideFromRight 1.2s cubic-bezier(0.16,1,0.3,1) 1.8s forwards; }
+
+    @keyframes shieldEntrance   { from { opacity:0; transform:scale(0.85); }  to { opacity:1; transform:scale(1); } }
+    @keyframes slideUp          { from { opacity:0; transform:translateY(100%); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeUp           { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes slideFromLeft    { from { opacity:0; transform:translateX(-40%); } to { opacity:1; transform:translateX(0); } }
+    @keyframes slideFromRight   { from { opacity:0; transform:translateX(40%);  } to { opacity:1; transform:translateX(0); } }
+    @keyframes shrinkAndMoveLogo { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(0.15) translateY(-80vh); opacity: 0; } }
+    @keyframes hidePreloaderBackground { 0% { opacity: 1; visibility: visible; } 100% { opacity: 0; visibility: hidden;  pointer-events: none; } }
+
+    /* ==========================================================================
+       CORE LAYOUT
+       ========================================================================== */
+    #app-frame {
+      flex: 1; border: 1px solid #000000;
+      display: grid;
+      grid-template-columns: 2fr 8fr 2fr;
+      grid-template-rows: 64px 1fr 128px;
+      overflow: hidden;
+    }
+
+    /* HEADER */
+    header {
+      grid-column: 1 / 4; grid-row: 1;
+      border-bottom: 1px solid #000000;
+      display: grid; grid-template-columns: 2fr 8fr 2fr;
+    }
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              background: "#ffffff",
-              foreground: "#000000",
-              nasablue: "#0b3d91",
-              nasared: "#fc3d21",
-              sysgray: "#f4f4f4"
-            },
-            fontFamily: {
-              mono: ['"JetBrains Mono"', 'monospace'],
-              sans: ['"JetBrains Mono"', 'monospace'],
-            }
-          }
-        }
-      }
-    </script>
+    .h-left { border-right: 1px solid #000000; display: flex; align-items: center; padding: 0 24px; gap: 12px; }
+    .h-left-logo { width: 32px; height: 32px; object-fit: contain; flex-shrink: 0; }
+    .h-left-text { display: flex; flex-direction: column; justify-content: center; }
     
-    <link rel="stylesheet" href="css/style.css">
+    .h-center { border-right: 1px solid #000000; display: flex; align-items: center; justify-content: space-between; padding: 0 24px; }
+    .h-right  { display: flex; align-items: center; justify-content: flex-end; padding: 0 24px; gap: 8px; }
 
-    <style>
-        /* Smooth scrolling di base (verrà disattivato via JS quando serve un salto istantaneo) */
-        html {
-            scroll-behavior: smooth;
-        }
+    /* SLIDER ZOOM */
+    .custom-slider { -webkit-appearance: none; width: 100%; background: transparent; cursor: pointer; margin: 0; outline: none; z-index: 10; position: relative; }
+    .custom-slider::-webkit-slider-thumb {
+      -webkit-appearance: none; height: 12px; width: 12px; background: #000000;
+      border-radius: 50%; cursor: pointer; margin-top: -5px; transition: transform 0.2s; position: relative; z-index: 20;
+    }
+    .custom-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    .custom-slider::-webkit-slider-runnable-track { width: 100%; height: 1px; background: #000000; z-index: 1;}
+    .zoom-control { display: flex; align-items: center; gap: 12px; width: 280px; }
 
-        :root {
-            --background: #ffffff;
-            --foreground: #000000;
-            --ease-extreme: cubic-bezier(0.16, 1, 0.3, 1);
-            --ease-fade: cubic-bezier(0.4, 0, 0.2, 1);
-        }
+    .icon-btn, .center-btn {
+      background: transparent; border: none; color: #000000; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; transition: all 0.2s;
+    }
+    .icon-btn:hover, .icon-btn.active, .center-btn:hover { background: #000000; color: #ffffff; }
+    .center-btn { border: 1px solid #000; width: 28px; height: 28px; margin-left: auto; }
 
-        /* --- STILI TAG & UI --- */
-        .tag-pill {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 18px; 
-            font-size: 0.875rem;
-            text-transform: uppercase; 
-            font-weight: 300; 
-            border: 1px solid var(--foreground);
-            border-radius: 9999px;
-            background-color: var(--background);
-            color: var(--foreground);
-            cursor: pointer;
-            transition: background-color 0.2s, color 0.2s;
-        }
-        .tag-pill:hover, .tag-pill.active {
-            background-color: var(--foreground);
-            color: var(--background); 
-        }
+    .btn-solid {
+      background: #000000; color: #ffffff; border: 1px solid #000000;
+      height: 32px; padding: 0 16px; display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 700; text-transform: uppercase; cursor: pointer; text-decoration: none;
+      transition: all 0.2s ease; font-family: inherit; font-size: 10px;
+    }
+    .btn-solid:hover { background: #ffffff; color: #000000; }
 
-        /* Stile per i link di navigazione nell'header */
-        .nav-link {
-            text-transform: uppercase;
-            font-weight: 700;
-            font-size: 0.875rem;
-            letter-spacing: 0.05em;
-            transition: color 0.2s ease;
-            position: relative;
-        }
-        .nav-link::after {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 1px;
-            bottom: -2px;
-            left: 0;
-            background-color: var(--foreground);
-            transition: width 0.3s var(--ease-extreme);
-        }
-        .nav-link:hover::after {
-            width: 100%;
-        }
+    /* SIDEBAR E FILTRI */
+    aside.sidebar {
+      grid-column: 1; grid-row: 2 / 4; border-right: 1px solid #000000; padding: 20px 24px; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 24px; background: #ffffff;
+    }
+    .input-box {
+      width: 100%; background: #ffffff; border: 1px solid #000000; color: #000000;
+      padding: 10px; font-family: inherit; font-size: 10px; text-transform: uppercase; outline: none; transition: 0.3s;
+    }
+    .input-box:focus { background: #000000; color: #ffffff; }
+    .filter-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .clear-btn { font-size: 9px; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; color: #666; }
+    .clear-btn:hover { color: #000; }
 
-        /* --- LAYOUT GRID ARCHIVIO --- */
-        .archive-grid-layout {
-            display: grid !important;
-            grid-template-columns: 40px 100px calc(50% - 212px) 200px 140px 1fr 30px !important;
-            align-items: center;
-            gap: 1.5rem; 
-        }
-        
-        @media (max-width: 1024px) {
-            .archive-grid-layout { grid-template-columns: 40px 80px calc(50% - 192px) 150px 100px 1fr 20px !important; gap: 1.5rem; }
-        }
-        @media (max-width: 768px) {
-            .archive-grid-layout { grid-template-columns: 30px 60px 1fr 20px !important; gap: 1.5rem; }
-            .archive-grid-layout .col-author, 
-            .archive-grid-layout .col-date, 
-            .archive-grid-layout .col-tag { display: none !important; }
-        }
+    /* RANGE FILTER */
+    .range-filter-wrapper { margin-top: 12px; }
+    .range-histogram { display: flex; align-items: flex-end; height: 32px; gap: 1px; margin-bottom: 6px; border-bottom: 1px solid #000000; }
+    .range-histo-bar { flex: 1; background: #f0f0f0; transition: background 0.2s; }
+    .range-histo-bar.active { background: #000000; }
+    .range-slider-container { position: relative; height: 16px; display: flex; align-items: center; }
+    .slider-track { position: absolute; width: 100%; height: 1px; background: #000000; z-index: 1; }
+    .slider-fill  { position: absolute; height: 3px; background: #000000; z-index: 2; transition: left 0.1s, width 0.1s; }
+    .range-slider-container input[type="range"] {
+      position: absolute; width: 100%; pointer-events: none; appearance: none; background: transparent; z-index: 10; margin: 0; outline: none;
+    }
+    .range-slider-container input[type="range"]::-webkit-slider-thumb {
+      pointer-events: auto; appearance: none; width: 12px; height: 12px; background: #000000; border-radius: 50%; cursor: pointer; position: relative; z-index: 20;
+    }
+    .range-labels { display: flex; justify-content: space-between; font-weight: 700; font-size: 9px; margin-top: 6px; }
 
-        /* --- BLOCCO SCROLL DURANTE IL LOADER --- */
-        body {
-            overflow: hidden; 
-            animation: restoreScroll 0.1s linear 4.8s forwards;
-        }
-        @keyframes restoreScroll {
-            to { overflow: auto; overflow-x: hidden; }
-        }
+    .tag-list { display: flex; flex-wrap: wrap; gap: 4px; }
+    .tag-btn {
+      background: #ffffff; border: 1px solid #000000; color: #000000;
+      padding: 4px 6px; font-size: 8px; cursor: pointer; text-transform: uppercase; font-family: inherit; transition: all 0.2s ease;
+    }
+    .tag-btn:hover, .tag-btn.active { background: #000000; color: #ffffff; font-weight: 700; }
 
-        /* --- FASE 2: FADE OUT DEL BACKGROUND BIANCO --- */
-        #preloader {
-            position: fixed; inset: 0;
-            background-color: var(--background);
-            z-index: 9999;
-            display: flex; justify-content: center; align-items: center;
-            animation: fadeOutPreloader 0.8s var(--ease-fade) 4.0s forwards;
-        }
-        @keyframes fadeOutPreloader {
-            to { opacity: 0; visibility: hidden; pointer-events: none; }
-        }
+    /* ABOUT CONTEXT BLOCK (TESTO A SINISTRA RIPRISTINATO) */
+    .about-context { margin-top: auto; padding-top: 24px; border-top: 1px solid #000000; }
+    .about-context p { font-size: 10px; line-height: 1.5; color: #444; text-align: left; margin-top: 8px; }
 
-        /* --- FASE 1: FADE OUT DEL LOGO --- */
-        .logo-container-loader {
-            position: relative; width: 500px; height: 500px;
-            display: flex; justify-content: center; align-items: center;
-            animation: fadeOutLogo 0.5s ease-in-out 3.5s forwards;
-        }
-        @keyframes fadeOutLogo {
-            to { opacity: 0; transform: scale(0.95); } 
-        }
+    /* CENTER VIEW */
+    section.center-view {
+      grid-column: 2; grid-row: 2; border-right: 1px solid #000000; border-bottom: 1px solid #000000;
+      display: flex; flex-direction: column; overflow: hidden; position: relative; background: #fdfdfd;
+    }
+    .timeline-viewport { flex: 1; overflow: auto; position: relative; scroll-behavior: auto; }
+    .timeline-width-wrapper { position: relative; height: 100%; }
 
-        /* --- STRUTTURA BASE DEL LOGO --- */
-        .shield-wrapper {
-            position: relative; width: 100%; height: 100%;
-            opacity: 1; transform: scale(1);
-            will-change: transform, opacity;
-        }
-        .base-sfondo { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; }
-        .masked-elements {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            -webkit-mask-image: url('assets/logo_parts/sfondo.png');
-            -webkit-mask-size: contain; -webkit-mask-position: center; -webkit-mask-repeat: no-repeat;
-            mask-image: url('assets/logo_parts/sfondo.png');
-            mask-size: contain; mask-position: center; mask-repeat: no-repeat;
-        }
-        .element {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: contain; opacity: 1; transform: translate(0);
-            will-change: transform, opacity;
-        }
-        .sette { clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%); }
-        .zero { clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%); }
+    /* MACRO ERAS RIBBON (COLORI SOLIDI, NESSUNA SFUMATURA) */
+    .macro-eras-ribbon {
+      position: absolute; top: 0; left: 0; width: 100%;
+      height: 32px; border-bottom: 1px solid #000000;
+      display: flex; z-index: 10;
+    }
+    .era-block {
+      display: flex; align-items: center; justify-content: center;
+      text-transform: uppercase; font-weight: 700; position: relative;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .era-label { font-size: 11px; font-weight: 700; white-space: nowrap; }
+    .era-black { background: #000000; color: #ffffff; border-right: 1px solid #ffffff; }
+    .era-blue  { background: #0B3D91; color: #ffffff; border-right: 1px solid #ffffff; }
+    .era-red   { background: #FC3D21; color: #ffffff; }
 
-        /* --- CLASSI MOTORE DELLE ANIMAZIONI --- */
-        .boot-anim.shield-wrapper { animation: shieldEntrance 1.5s var(--ease-extreme) both; }
-        .boot-anim .razzo, .loop-anim .razzo { animation: slideUp 1.5s var(--ease-extreme) 0.4s both; }
-        .boot-anim .nasa, .loop-anim .nasa { animation: fadeUp 1.2s var(--ease-extreme) 1.2s both; }
-        .boot-anim .date, .loop-anim .date { animation: fadeUp 1.2s var(--ease-extreme) 1.4s both; }
-        .boot-anim .sette, .loop-anim .sette { animation: slideFromLeft 1.2s var(--ease-extreme) 1.8s both; }
-        .boot-anim .zero, .loop-anim .zero { animation: slideFromRight 1.2s var(--ease-extreme) 1.8s both; }
+    /* RULER DATE VERTICALI E NESSUNA LINEA SUL TESTO */
+    .time-ruler { position: absolute; top: 32px; left: 0; width: 100%; height: calc(100% - 32px); z-index: 1; pointer-events: none; }
+    .ruler-tick-group { position: absolute; top: 0; height: 100vh; pointer-events: none; width: 1px; }
+    .ruler-label {
+      position: absolute; top: 8px; left: -5px;
+      writing-mode: vertical-rl; transform: rotate(180deg);
+      font-size: 10px; font-weight: 700; color: #000000; white-space: nowrap;
+    }
+    .ruler-long-line {
+      position: absolute; top: 50px; left: 0;
+      width: 1px; height: 100vh; background: rgba(0,0,0,0.15);
+    }
 
-        @keyframes shieldEntrance { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideFromLeft { from { opacity: 0; transform: translateX(-40%); } to { opacity: 1; transform: translateX(0); } }
-        @keyframes slideFromRight { from { opacity: 0; transform: translateX(40%); } to { opacity: 1; transform: translateX(0); } }
+    /* TIMELINE BARS */
+    .timeline-lanes {
+      position: relative; padding-top: 80px; padding-bottom: 48px;
+      display: flex; flex-direction: column; gap: 8px; z-index: 20;
+    }
+    .lane { height: 48px; position: relative; width: 100%; }
+    .project-bar {
+      position: absolute; height: 48px; top: 0; cursor: pointer;
+      overflow: hidden; border: none;
+      border-left: 1px solid rgba(255,255,255,0.3); border-right: 1px solid rgba(255,255,255,0.3);
+      display: flex; justify-content: space-between; align-items: center;
+      transition: box-shadow 0.2s, filter 0.2s;
+    }
+    .project-bar:hover  { filter: brightness(1.12); z-index: 25; box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+    .project-bar.selected { box-shadow: inset 0 0 0 2px #ffffff, 0 0 0 2px #000000; z-index: 30; }
 
-        /* --- CSS PER FADE TRANSIZIONI FLUIDE (JS HOOK) --- */
-        #archive-container {
-            transition: opacity 0.4s var(--ease-fade);
-            will-change: opacity;
-        }
-        .fade-out {
-            opacity: 0 !important;
-        }
+    .pb-left, .pb-right { display: flex; flex-direction: column; justify-content: center; height: 100%; padding: 0 16px; }
+    .pb-left  { position: sticky; left: 0; }
+    .pb-right { position: sticky; right: 0; text-align: right; }
 
-    </style>
+    /* TITOLI PROGETTO FORZATI A 12px */
+    .pb-title { color: #ffffff; font-size: 12px; font-weight: 700; text-transform: uppercase; white-space: nowrap; }
+    .pb-dates { color: #ffffff; font-size: 9px; font-weight: 400; text-transform: uppercase; margin-top: 2px; opacity: 0.9; white-space: nowrap; }
+
+    /* TOOLTIP */
+    #hoverTooltip {
+      position: fixed; display: none; background: #ffffff; border: 1px solid #000000;
+      padding: 12px; z-index: 100; pointer-events: none; width: 260px; box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+    }
+    #hoverTooltip img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 1px solid #000; margin-bottom: 8px; }
+    .tooltip-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+    .tooltip-tag  { font-size: 8px; border: 1px solid #000; padding: 2px 4px; text-transform: uppercase; }
+
+    /* DRAWER */
+    aside.drawer {
+      grid-column: 3; grid-row: 2; border-bottom: 1px solid #000000;
+      padding: 24px; overflow-y: auto; overflow-x: hidden; position: relative; background: #ffffff;
+    }
+    #drawerContentWrapper { opacity: 0; transform: translateY(16px); transition: all 0.4s ease; }
+    #drawerContentWrapper.visible { opacity: 1; transform: translateY(0); }
+    .drawer-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+    .drawer-img { width: 100%; height: auto; aspect-ratio: 16/9; border: 1px solid #000000; object-fit: cover; margin-bottom: 24px; }
+    .data-block  { margin-bottom: 24px; }
+    .data-label  { margin-bottom: 8px; text-transform: uppercase; color: #000000; font-weight: 700; border-bottom: 1px solid #000000; padding-bottom: 4px; }
+
+    /* TABLE VIEW */
+    .table-viewport { flex: 1; overflow-y: auto; padding: 24px; display: none; }
+    table { width: 100%; border-collapse: collapse; text-align: left; }
+    th { border-bottom: 1px solid #000000; padding-bottom: 16px; text-transform: uppercase; font-weight: 700; }
+    td { border-bottom: 1px solid #000000; padding: 16px 0; vertical-align: top; }
+    .table-thumb { width: 120px; height: 80px; border: 1px solid #000000; object-fit: cover; display: block; }
+
+    /* FOOTER */
+    .f-center { grid-column: 2; grid-row: 3; border-right: 1px solid #000000; padding: 24px; display: flex; flex-direction: column; }
+    .f-right  { grid-column: 3; grid-row: 3; padding: 24px; display: flex; flex-direction: column; justify-content: space-between; }
+    .histo-graphic { flex: 1; display: flex; align-items: flex-end; gap: 2px; margin: 8px 0; border-bottom: 1px solid #000000; }
+    .histo-bar { flex: 1; border: 1px solid #000000; transition: height 0.6s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.6s; }
+    .histo-bar.era-black { background: #000000; border-color: #000000; }
+    .histo-bar.era-blue  { background: #0B3D91; border-color: #0B3D91; }
+    .histo-bar.era-red   { background: #FC3D21; border-color: #FC3D21; }
+    .metric-row { display: flex; justify-content: space-between; border-bottom: 1px solid #000000; padding-bottom: 8px; margin-bottom: 8px; text-transform: uppercase; font-size: 10px; }
+  </style>
 </head>
-<body class="bg-background text-foreground font-mono antialiased text-sm">
+<body>
 
-    <div id="preloader">
-        <div class="logo-container-loader">
-            <div class="shield-wrapper boot-anim">
-                <img src="assets/logo_parts/sfondo.png" class="base-sfondo" alt="Sfondo Blu">
-                <div class="masked-elements">
-                    <img src="assets/logo_parts/razzo.png" class="element razzo" alt="Razzo">
-                    <img src="assets/logo_parts/nasa.png" class="element nasa" alt="Logo NASA">
-                    <img src="assets/logo_parts/date.png" class="element date" alt="Date">
-                    <img src="assets/logo_parts/70.png" class="element sette" alt="Numero 7">
-                    <img src="assets/logo_parts/70.png" class="element zero" alt="Numero 0">
-                </div>
-            </div>
+  <div id="preloader">
+    <div class="logo-container-loader">
+      <div class="shield-wrapper">
+        <img src="assets/imgs/logo_parts/sfondo.png" class="base-sfondo" alt="Sfondo">
+        <div class="masked-elements">
+          <img src="assets/imgs/logo_parts/razzo.png"  class="logo-element razzo"  alt="Razzo">
+          <img src="assets/imgs/logo_parts/nasa.png"   class="logo-element nasa"   alt="NASA">
+          <img src="assets/imgs/logo_parts/date.png"   class="logo-element date-l" alt="Date">
+          <img src="assets/imgs/logo_parts/70.png"     class="logo-element sette"  alt="7">
+          <img src="assets/imgs/logo_parts/70.png"     class="logo-element zero"   alt="0">
         </div>
+      </div>
     </div>
-    
-    <header class="flex flex-col md:flex-row items-stretch bg-background">
-        <div class="w-full md:w-auto md:h-48 md:aspect-square shrink-0 border-b md:border-b-0 md:border-r border-foreground p-6 flex justify-center items-center bg-background">
-            
-            <div class="w-[128px] h-[128px] md:w-[160px] md:h-[160px] relative">
-                <div class="shield-wrapper" id="header-animated-logo">
-                    <img src="assets/logo_parts/sfondo.png" class="base-sfondo" alt="Sfondo Blu">
-                    <div class="masked-elements">
-                        <img src="assets/logo_parts/razzo.png" class="element razzo" alt="Razzo">
-                        <img src="assets/logo_parts/nasa.png" class="element nasa" alt="Logo NASA">
-                        <img src="assets/logo_parts/date.png" class="element date" alt="Date">
-                        <img src="assets/logo_parts/70.png" class="element sette" alt="Numero 7">
-                        <img src="assets/logo_parts/70.png" class="element zero" alt="Numero 0">
-                    </div>
-                </div>
-            </div>
+  </div>
 
+  <div id="app-frame">
+    
+    <header>
+      <div class="h-left">
+        <img src="assets/imgs/logo.png" class="h-left-logo" alt="NASA 70 Logo">
+        <div class="h-left-text">
+          <div class="title-large">NASA 70</div>
+          <div class="uppercase" style="margin-top: 4px; font-size: 10px;">Archive System</div>
         </div>
-        
-        <div class="flex-1 p-6 flex flex-col justify-between bg-background">
-            <div class="flex justify-end gap-6 mb-4">
-                <a href="#database-section" class="nav-link">Projects</a>
-                <a href="about.html" class="nav-link">About Us</a>
-            </div>
-            <p class="text-sm leading-relaxed text-justify hyphens-auto text-foreground mt-auto" lang="en">
-                A <span class="font-bold">student-built</span>, ever-expanding digital archive celebrating <span class="font-bold">NASA 70.</span> It gathers the interactive projects produced by students of the <span class="font-bold">Interaction Design course</span> at <span class="font-bold">SUPSI</span>, starting with the first thirteen from <span class="font-bold">2026</span> and growing each year as the project will continue.
-            </p>
+      </div>
+      <div class="h-center">
+        <div class="zoom-control uppercase bold" style="font-size: 10px;">
+          <i data-lucide="zoom-out" style="width: 14px;"></i>
+          <input type="range" class="custom-slider" id="zoomSlider" min="2000" max="30000" value="8000" oninput="handleZoomInput(this.value)">
+          <i data-lucide="zoom-in" style="width: 14px;"></i>
         </div>
+        <button class="center-btn" onclick="resetView()" title="Center on NASA Era"><i data-lucide="crosshair" style="width: 14px;"></i></button>
+      </div>
+      <div class="h-right">
+        <button id="viewTimeline" class="icon-btn active" onclick="setView('timeline')"><i data-lucide="rows-3" style="width: 18px;"></i></button>
+        <button id="viewTable" class="icon-btn" onclick="setView('table')"><i data-lucide="layout-grid" style="width: 18px;"></i></button>
+      </div>
     </header>
 
-    <div id="database-section">
-        <section class="border-y border-foreground bg-foreground flex items-center px-6 py-6">
-            <div class="font-light tracking-widest shrink-0 mr-6 flex items-center gap-2 uppercase text-sm text-background">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                Search
-            </div>
-            <input type="text" id="search-input" placeholder="Title, author, or keyword..." class="flex-1 bg-transparent outline-none border-none text-sm font-mono placeholder:text-gray-500 text-background w-full uppercase font-light">
-        </section>
-
-        <div class="flex flex-col md:flex-row border-b border-foreground bg-background">
-            <section class="w-full md:w-1/2 p-6 border-b md:border-b-0 md:border-r border-foreground">
-                <div class="text-sm font-light tracking-widest mb-4 uppercase text-foreground">Timeframe (Year)</div>
-                <div id="years-container" class="flex flex-wrap gap-2"></div>
-            </section>
-            
-            <section class="w-full md:w-1/2 p-6">
-                <div class="text-sm font-light tracking-widest mb-4 uppercase text-foreground">Classification (Category)</div>
-                <div id="tags-container" class="flex flex-wrap gap-2"></div>
-            </section>
+    <aside class="sidebar">
+      <div>
+        <div class="uppercase bold" style="margin-bottom: 8px;">Search Engine</div>
+        <input type="text" id="searchInput" class="input-box" placeholder="Search project..." oninput="handleFilter()">
+      </div>
+      
+      <div>
+        <div class="filter-header">
+          <div class="uppercase bold">Time Range</div>
+          <span class="clear-btn uppercase" onclick="clearTimeFilter()">Clear</span>
         </div>
-
-        <section class="px-6 py-6 flex justify-between text-sm font-light tracking-widest bg-foreground text-background uppercase border-b border-foreground">
-            <div id="showing-text">SHOWING 0 / 0</div>
-            <div id="active-filters-text">ALL CATEGORIES · ALL YEARS</div>
-        </section>
-
-        <div class="archive-grid-layout border-b border-foreground px-6 py-6 text-sm font-light tracking-widest bg-background uppercase text-foreground">
-            <span class="col-num">№</span>
-            <span class="col-thumb">IMG_DATA</span>
-            <span class="col-title">PROJECT_TITLE</span>
-            <span class="col-author">AUTHOR</span>
-            <span class="col-date">DATE</span>
-            <span class="col-tag">CLASSIFICATION</span>
-            <span class="col-arrow"></span>
+        <div class="range-filter-wrapper">
+          <div class="range-histogram" id="rangeHistogram"></div>
+          <div class="range-slider-container">
+            <div class="slider-track"></div>
+            <div class="slider-fill" id="sliderFill"></div>
+            <input type="range" id="rangeMin" min="-3000" max="4000" value="-3000" oninput="updateRangeFilter()">
+            <input type="range" id="rangeMax" min="-3000" max="4000" value="4000" oninput="updateRangeFilter()">
+          </div>
+          <div class="range-labels">
+            <span id="labelMin">-3000 BC</span>
+            <span id="labelMax">FUTURE</span>
+          </div>
         </div>
+      </div>
 
-        <main id="archive-container" class="flex flex-col bg-background"></main>
+      <div>
+        <div class="filter-header">
+          <div class="uppercase bold">Categories</div>
+          <span class="clear-btn uppercase" onclick="clearCategories()">Clear</span>
+        </div>
+        <div class="tag-list" id="tagList"></div>
+      </div>
+
+      <div class="about-context">
+        <div class="uppercase bold">About The Archive</div>
+        <p>
+          This ecosystem celebrates NASA's 70th anniversary by bringing together 13 interactive platforms developed in 2028. Unlike a traditional archive, the timeline is not based on publication dates, but rather maps the historical periods covered by the content. From pre-NASA antiquity and the discoveries of the space age, to infinite projections into the future.
+        </p>
+      </div>
+    </aside>
+
+    <section class="center-view">
+      <div class="timeline-viewport" id="timelineView">
+        <div class="timeline-width-wrapper" id="timelineWrapper">
+          <div class="macro-eras-ribbon" id="macroEras">
+            <div class="era-block era-black" id="eraPre"><span class="era-label">PRE NASA</span></div>
+            <div class="era-block era-blue" id="eraNasa"><span class="era-label">NASA</span></div>
+            <div class="era-block era-red" id="eraFuture"><span class="era-label">FUTURE</span></div>
+          </div>
+          <div class="time-ruler" id="timeRuler"></div>
+          <div class="timeline-lanes" id="timelineLanes"></div>
+        </div>
+      </div>
+
+      <div class="table-viewport" id="tableView">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 25%;">Project</th>
+              <th style="width: 40%;">Description</th>
+              <th style="width: 20%;">Categories</th>
+              <th style="width: 15%; text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <aside class="drawer">
+      <div style="height: 100%; display: flex; align-items: center; justify-content: center; text-transform: uppercase; color: #888; text-align: center;" id="drawerEmpty">
+        [ Select Project Element ]
+      </div>
+      <div id="drawerContentWrapper"></div>
+    </aside>
+
+    <div class="f-center">
+      <div class="uppercase bold" style="font-size: 10px;">Exact Data Density Map</div>
+      <div class="histo-graphic" id="histogram"></div>
+      <div style="display: flex; justify-content: space-between; text-transform: uppercase; font-size: 10px;">
+        <span>PRE NASA</span><span>NASA ERA</span><span>FUTURE</span>
+      </div>
     </div>
 
-    <footer class="p-12 grid grid-cols-1 md:grid-cols-4 gap-6 bg-foreground text-sm uppercase text-background">
-        <div>
-            <div class="font-light mb-1 text-background">System</div>
-            <div class="tracking-widest font-bold">THE NASA 70 ARCHIVE</div>
+    <div class="f-right">
+      <div>
+        <div class="metric-row">
+          <span>Total Projects</span>
+          <strong id="metricTotal">0</strong>
         </div>
-        <div>
-            <div class="font-light mb-1 text-background">Origin</div>
-            <div class="tracking-widest font-bold">INTERACTION MEDIA DESIGN - SUPSI DACD</div>
+        <div class="metric-row">
+          <span>Archive Status</span>
+          <strong>Active</strong>
         </div>
-        <div>
-            <div class="font-light mb-1 text-background">Build</div>
-            <div class="tracking-widest font-bold">2026 ©</div>
-        </div>
-        <div>
-            <div class="font-light mb-1 text-background">Status</div>
-            <div class="tracking-widest font-bold">ACTIVE / GROWING_YEARLY</div>
-        </div>
-    </footer>
+      </div>
+      <div class="uppercase bold" style="color: #000; text-align: right; font-size: 10px;">Archive Version 2.0</div>
+    </div>
 
-    <script type="module" src="js/main.js"></script>
+  </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const headerLogo = document.getElementById('header-animated-logo');
-            
-            setTimeout(() => {
-                setInterval(() => {
-                    headerLogo.classList.remove('loop-anim');
-                    void headerLogo.offsetWidth;
-                    headerLogo.classList.add('loop-anim');
-                }, 12000); 
-            }, 7000); 
-        });
-    </script>
+  <div id="hoverTooltip">
+    <img id="hoverImg" src="" alt="preview">
+    <div id="hoverTitle" class="bold uppercase" style="font-size: 12px;"></div>
+    <div id="hoverDates" style="margin-top: 4px; color: #555; font-size: 10px; font-weight: bold;"></div>
+    <div class="tooltip-tags" id="hoverTags"></div>
+  </div>
+
+  <script>
+    /* ==========================================================================
+       DATASET RIGIDO UNIFICATO
+       ========================================================================= */
+    const projectsData = [
+      { id:"1", title:"Project Moonbound", startYear:2017, endYear:4000, releaseDate:"01.04.2028", image:"assets/imgs/api_imgs/projectmoonbound_1.jpg", description:"Experience culminates with a visual journey to the Moon and becomes a veritable historical archive.", tags:["game","apollo-program","archive"], projectUrl:"https://riccardovosti.github.io/projectmoonbound/" },
+      { id:"2", title:"Perseverance Rover", startYear:2020, endYear:2026, releaseDate:"03.12.2028", image:"assets/imgs/api_imgs/perseverancerover_1.jpg", description:"Interactive page designed for scientific outreach and virtual exploration of the Mars 2020 mission.", tags:["rover","perseverance","mars"], projectUrl:"https://naheleee.github.io/Progetto_1_PerseveranceRover/" },
+      { id:"3", title:"Radiowave NASA", startYear:1961, endYear:1983, releaseDate:"28.04.2028", image:"assets/imgs/api_imgs/radiowave_1.jpg", description:"Interactive digital archive of the ten most iconic audio transmissions in NASA's history.", tags:["audio","apollo","archive"], projectUrl:"https://claudio-ceppi.github.io/CV429.01-Interaction-Design/Radiowave_NASA/files/" },
+      { id:"4", title:"Other Worlds", startYear:2004, endYear:2022, releaseDate:"23.01.2028", image:"assets/imgs/api_imgs/otherworlds_1.jpg", description:"Exploration of 11 confirmed exoplanets from the NASA Exoplanet Archive.", tags:["planet","exoplanets","astronomy"], projectUrl:"https://djordjaa.github.io/Other_Worlds/" },
+      { id:"5", title:"MoonPrint", startYear:1969, endYear:1969, releaseDate:"12.10.2028", image:"assets/imgs/api_imgs/moonprint_1.jpg", description:"Explores how global media reported the Apollo 11 moon landing through visual comparisons.", tags:["archive","moon","media"], projectUrl:"https://sofiaribeiromarques.github.io/NASA/" },
+      { id:"6", title:"Eyes on earth", startYear:2002, endYear:2020, releaseDate:"13.11.2028", image:"assets/imgs/api_imgs/eyesonearth_1.jpg", description:"Examines the ongoing impact of climate change through technical visualization of satellites.", tags:["climate","satellites","earth"], projectUrl:"https://carladegennaro.github.io/interaction_design/index.html" },
+      { id:"7", title:"Apollo Landing Archive", startYear:1969, endYear:1972, releaseDate:"06.11.2028", image:"assets/imgs/api_imgs/lunararchive_1.jpg", description:"Showcases lunar panoramas built from photographs taken during the Apollo missions.", tags:["3d","apollo","history"], projectUrl:"https://dadiccs.github.io/nasa/" },
+      { id:"8", title:"Nebula Vision", startYear:1745, endYear:1824, releaseDate:"06.05.2028", image:"assets/imgs/api_imgs/nebulavision_1.jpg", description:"Guided journey through the Eagle and Helix nebulae to understand our Solar System.", tags:["astronomy","space","nebula"], projectUrl:"https://ali-0032.github.io/Nebula_Vision/05_prototipo_3/" },
+      { id:"9", title:"SolarScale", startYear:-2000, endYear:1846, releaseDate:"08.11.2028", image:"assets/imgs/api_imgs/solarscale_1.jpg", description:"Exploring the true scale of the Solar System, visualizing planetary sizes, positions.", tags:["planet","3d","educational"], projectUrl:"https://lucamazzolaa.github.io/SolarScale/" },
+      { id:"10", title:"Hubble Space", startYear:1990, endYear:2025, releaseDate:"25.11.2028", image:"assets/imgs/api_imgs/hubble_1.jpg", description:"A tribute to the Hubble satellite. We have obtained the first detailed images of space.", tags:["archive","history","astronomy"], projectUrl:"https://laura-pantani.github.io/NASA-P1/p1/" },
+      { id:"11", title:"NEO Protocol", startYear:2000, endYear:4000, releaseDate:"10.02.2028", image:"assets/imgs/api_imgs/neoprotocol_1.jpg", description:"Interactive web ecosystem designed to monitor Near-Earth Objects (NEOs) in real time.", tags:["data visualization","earth","neo"], projectUrl:"https://melissabroggini.github.io/NEO_Protocol/" },
+      { id:"12", title:"Beyond The Myth", startYear:-350, endYear:4000, releaseDate:"09.07.2028", image:"assets/imgs/api_imgs/beyondthemyth_1.jpg", description:"Digital ecosystem mapping the evolution of astronomical knowledge, from myth to scientific proof.", tags:["history","paradigms","epistemology"], projectUrl:"https://kikerio.github.io/beyondthemyth/" },
+      { id:"13", title:"Spacesuit evolution", startYear:1958, endYear:2011, releaseDate:"06.03.2028", image:"assets/imgs/api_imgs/spacesuits_1.jpg", description:"Explores the evolution of NASA spacesuits from the 1960s to 2011.", tags:["educational","spacesuits","timeline"], projectUrl:"https://davidebarattini.github.io/Nasa_Spacesuits/" }
+    ];
+
+    /* ==========================================================================
+       MOTORE MATEMATICO
+       ========================================================================== */
+    const START_YEAR = -3000;
+    const END_YEAR = 4000; 
+    const TOTAL_SPAN = END_YEAR - START_YEAR;
+    const PADDING_GLOBAL = 24;
+
+    let currentTotalWidth = 8000; 
+    let zoomAnimationFrame;
+
+    let activeFilter = null;
+    let rangeMin = START_YEAR;
+    let rangeMax = END_YEAR;
+    let selectedId = null;
+
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+      document.getElementById("metricTotal").innerText = projectsData.length;
+      buildFilters();
+      buildRangeHistogram();
+      buildTimelineDOM(); 
+      updateSliderVisuals();
+      handleFilter();
+      setTimeout(resetView, 100); 
+    });
+
+    // SISTEMA DI ZOOM Iper-Fluido
+    function handleZoomInput(val) {
+      if(zoomAnimationFrame) cancelAnimationFrame(zoomAnimationFrame);
+      zoomAnimationFrame = requestAnimationFrame(() => {
+        currentTotalWidth = parseInt(val);
+        updateTimelineLayout();
+        centerTimeline(); 
+      });
+    }
+
+    function resetView() {
+      const viewport = document.getElementById("timelineView");
+      if (!viewport) return;
+      const targetNasaWidth = viewport.clientWidth / 3;
+      const newTotalWidth = (TOTAL_SPAN / 70) * targetNasaWidth;
+      let boundedWidth = Math.max(3000, Math.min(newTotalWidth, 30000));
+      
+      document.getElementById("zoomSlider").value = boundedWidth;
+      currentTotalWidth = boundedWidth;
+      updateTimelineLayout();
+      centerTimeline();
+    }
+
+    function centerTimeline() {
+      const viewport = document.getElementById("timelineView");
+      if (!viewport) return;
+      const nasaCenterPx = getX(1958) + ((getX(2028) - getX(1958)) / 2);
+      viewport.scrollLeft = nasaCenterPx - (viewport.clientWidth / 2);
+    }
+
+    function formatYearRange(s, e) {
+      const sStr = s < 0 ? `${Math.abs(s)} BC` : s;
+      if (e >= 3000) return `${sStr} — `; 
+      return `${sStr} — ${e}`;
+    }
+
+    // CORREZIONE GRADIENTE (p.startYear aggiunto)
+    function getFluidGradient(p) {
+      const cPre = '#000000'; const cNasa = '#0B3D91'; const cFuture = '#FC3D21';
+      
+      if (p.endYear <= 1958) return cPre;
+      if (p.startYear >= 1958 && p.endYear <= 2028) return cNasa;
+      if (p.startYear >= 2028) return cFuture;
+
+      let span = p.endYear - p.startYear; 
+      if (span === 0) span = 1; // Gestione progetti puntuali
+      let stops = [];
+      
+      // ERRORE CORRETTO QUI: aggiunto p. davanti a startYear
+      if(p.startYear < 1958) stops.push(`${cPre} 0%`);
+      else if (p.startYear >= 1958 && p.startYear < 2028) stops.push(`${cNasa} 0%`);
+      else stops.push(`${cFuture} 0%`);
+
+      if(p.startYear < 1958 && p.endYear > 1958) {
+          let perc = ((1958 - p.startYear) / span) * 100;
+          // Sfumatura Svizzera Netta (Aggiunto calc per hard stop)
+          stops.push(`${cPre} calc(${perc}% - 1px)`, `${cNasa} calc(${perc}% + 1px)`); 
+      }
+      
+      if(p.startYear < 2028 && p.endYear > 2028) {
+          let perc = ((2028 - p.startYear) / span) * 100;
+          stops.push(`${cNasa} calc(${perc}% - 1px)`, `${cFuture} calc(${perc}% + 1px)`);
+      }
+
+      if (p.endYear <= 1958) stops.push(`${cPre} 100%`);
+      else if (p.endYear <= 2028) stops.push(`${cNasa} 100%`);
+      else stops.push(`${cFuture} 100%`);
+
+      return `linear-gradient(to right, ${stops.join(', ')})`;
+    }
+
+    // COSTRUZIONE DOM TIMELINE
+    function buildTimelineDOM() {
+      const container = document.getElementById("timelineLanes");
+      container.innerHTML = "";
+
+      projectsData.forEach(p => {
+        const lane = document.createElement('div');
+        lane.className = 'lane';
+        lane.id = `lane-${p.id}`;
+
+        const bar = document.createElement('div');
+        bar.className = 'project-bar';
+        bar.id = `bar-${p.id}`;
+        
+        let formatted = formatYearRange(p.startYear, p.endYear);
+        bar.innerHTML = `
+          <div class="pb-left">
+            <span class="pb-title">${p.title}</span><span class="pb-dates">${formatted}</span>
+          </div>
+          <div class="pb-right">
+            <span class="pb-title">${p.title}</span><span class="pb-dates">${formatted}</span>
+          </div>
+        `;
+        
+        bar.onmouseenter = (e) => showTooltip(e, p);
+        bar.onmousemove = (e) => moveTooltip(e);
+        bar.onmouseleave = () => hideTooltip();
+        bar.onclick = () => selectProject(p.id);
+
+        lane.appendChild(bar);
+        container.appendChild(lane);
+      });
+    }
+
+    // AGGIORNAMENTO DINAMICO (ZOOM E FILTRI)
+    function updateTimelineLayout() {
+      document.getElementById("timelineWrapper").style.width = `${currentTotalWidth + (PADDING_GLOBAL * 2)}px`;
+
+      let pxStart = getX(START_YEAR);
+      let px1958 = getX(1958);
+      let px2028 = getX(2028);
+      let pxEnd = getX(END_YEAR);
+
+      document.getElementById("eraPre").style.marginLeft = `${pxStart}px`;
+      document.getElementById("eraPre").style.width = `${px1958 - pxStart}px`;
+      document.getElementById("eraNasa").style.width = `${px2028 - px1958}px`;
+      document.getElementById("eraFuture").style.width = `${pxEnd - px2028}px`;
+
+      let step = 50;
+      if(currentTotalWidth < 5000) step = 200;
+      else if (currentTotalWidth < 9000) step = 100;
+      else step = 50;
+
+      const ruler = document.getElementById("timeRuler");
+      ruler.innerHTML = "";
+      for (let y = START_YEAR; y <= END_YEAR; y += step) {
+        let label = y < 0 ? `${Math.abs(y)} BC` : y;
+        let tick = document.createElement('div');
+        tick.className = "ruler-tick-group";
+        tick.style.left = `${getX(y)}px`;
+        tick.innerHTML = `
+          <div class="ruler-label">${label}</div>
+          <div class="ruler-long-line"></div>
+        `;
+        ruler.appendChild(tick);
+      }
+
+      const filtered = getFilteredData();
+      const visibleIds = filtered.map(p => p.id);
+
+      projectsData.forEach(p => {
+        const lane = document.getElementById(`lane-${p.id}`);
+        const bar = document.getElementById(`bar-${p.id}`);
+        
+        if(visibleIds.includes(p.id)) {
+          lane.style.display = "block";
+          let x1 = getX(p.startYear);
+          let x2 = getX(p.endYear);
+          let w = Math.max(x2 - x1, 120);
+
+          bar.style.background = getFluidGradient(p); // Usa la funzione corretta
+          bar.style.transform = `translateX(${x1}px)`;
+          bar.style.width = `${w}px`;
+          
+          bar.querySelector('.pb-right').style.display = w > 600 ? "flex" : "none";
+          if(selectedId === p.id) bar.classList.add("selected"); else bar.classList.remove("selected");
+        } else {
+          lane.style.display = "none";
+        }
+      });
+      renderDataDensityMap();
+    }
+
+    // MAPPA DENSITÀ
+    function renderDataDensityMap() {
+      const buckets = 80;
+      const step = TOTAL_SPAN / buckets;
+      let counts = new Array(buckets).fill(0);
+      
+      const filtered = getFilteredData();
+      filtered.forEach(p => {
+        for(let i=0; i<buckets; i++) {
+          let bStart = START_YEAR + (i*step);
+          let bEnd = bStart + step;
+          if (p.startYear <= bEnd && p.endYear >= bStart) counts[i]++;
+        }
+      });
+
+      const max = Math.max(...counts, 1);
+      const histo = document.getElementById("histogram");
+      histo.innerHTML = "";
+      
+      for(let i=0; i<buckets; i++) {
+        let h = (counts[i] / max) * 100;
+        let bucketMidpoint = START_YEAR + (i*step) + (step/2);
+        
+        let color = '#000000';
+        if (bucketMidpoint >= 1958 && bucketMidpoint <= 2028) color = '#0B3D91';
+        if (bucketMidpoint > 2028) color = '#FC3D21';
+        
+        histo.innerHTML += `<div class="histo-bar" style="height: ${h === 0 ? 2 : h}%; background-color: ${color}; border-color: ${color};"></div>`;
+      }
+    }
+
+    // FILTRI CATEGORIA
+    function buildFilters() {
+      const allTags = new Set();
+      projectsData.forEach(p => p.tags.forEach(t => allTags.add(t)));
+      const list = document.getElementById("tagList");
+      list.innerHTML = "";
+      Array.from(allTags).sort().forEach(tag => {
+        list.innerHTML += `<button class="tag-btn" id="tag-${tag}" onclick="setFilter('${tag}')">${tag}</button>`;
+      });
+    }
+
+    function setFilter(tag) {
+      activeFilter = activeFilter === tag ? null : tag;
+      document.querySelectorAll(".tag-btn").forEach(b => b.classList.remove("active"));
+      if (activeFilter) document.getElementById(`tag-${tag}`).classList.add("active");
+      handleFilter();
+    }
+
+    function clearCategories() {
+      activeFilter = null;
+      document.querySelectorAll(".tag-btn").forEach(b => b.classList.remove("active"));
+      handleFilter();
+    }
+
+    // STORICO BOOKING STYLE
+    function buildRangeHistogram() {
+      const hist = document.getElementById("rangeHistogram");
+      hist.innerHTML = "";
+      const buckets = 20;
+      const step = TOTAL_SPAN / buckets;
+      let counts = new Array(buckets).fill(0);
+      
+      projectsData.forEach(p => {
+        for(let i=0; i<buckets; i++) {
+          let bStart = START_YEAR + (i*step);
+          let bEnd = bStart + step;
+          if (p.startYear <= bEnd && p.endYear >= bStart) counts[i]++;
+        }
+      });
+      const max = Math.max(...counts, 1);
+      
+      for(let i=0; i<buckets; i++) {
+        let h = (counts[i] / max) * 100;
+        hist.innerHTML += `<div class="range-histo-bar active" style="height: ${h === 0 ? 2 : h}%;" id="rhb-${i}"></div>`;
+      }
+    }
+
+    function updateRangeFilter() {
+      let v1 = parseInt(document.getElementById("rangeMin").value);
+      let v2 = parseInt(document.getElementById("rangeMax").value);
+      if(v1 > v2) { let temp = v1; v1 = v2; v2 = temp; }
+      rangeMin = v1; rangeMax = v2;
+      
+      document.getElementById("labelMin").innerText = v1 < 0 ? Math.abs(v1)+" BC" : v1;
+      document.getElementById("labelMax").innerText = v2 >= 3000 ? "FUTURE" : v2;
+      
+      updateSliderVisuals();
+      handleFilter();
+    }
+
+    function updateSliderVisuals() {
+      const minP = ((rangeMin - START_YEAR) / TOTAL_SPAN) * 100;
+      const maxP = ((rangeMax - START_YEAR) / TOTAL_SPAN) * 100;
+      const fill = document.getElementById("sliderFill");
+      fill.style.left = `${minP}%`;
+      fill.style.width = `${maxP - minP}%`;
+
+      const bars = document.querySelectorAll(".range-histo-bar");
+      bars.forEach((b, i) => {
+        let bucketYear = START_YEAR + (TOTAL_SPAN / 20) * i;
+        if(bucketYear >= rangeMin && bucketYear <= rangeMax) b.classList.add("active");
+        else b.classList.remove("active");
+      });
+    }
+
+    function clearTimeFilter() {
+      document.getElementById("rangeMin").value = START_YEAR;
+      document.getElementById("rangeMax").value = END_YEAR;
+      updateRangeFilter();
+    }
+
+    // MOTORE RICERCA E APPLICAZIONE
+    function getFilteredData() {
+      const q = document.getElementById("searchInput").value.toLowerCase();
+      return projectsData.filter(p => {
+        const matchText = p.title.toLowerCase().includes(q) || p.description.toLowerCase().includes(q);
+        const matchTag = activeFilter ? p.tags.includes(activeFilter) : true;
+        const matchRange = !(p.endYear < rangeMin || p.startYear > rangeMax);
+        return matchText && matchTag && matchRange;
+      });
+    }
+
+    function handleFilter() {
+      getFilteredData();
+      updateTimelineLayout();
+      renderTable(getFilteredData());
+    }
+
+    // TOOLTIP FLOTTANTE
+    const tooltip = document.getElementById("hoverTooltip");
+    function showTooltip(e, project) {
+      tooltip.style.display = "block";
+      document.getElementById("hoverImg").src = project.image;
+      document.getElementById("hoverTitle").innerText = project.title;
+      document.getElementById("hoverDates").innerText = formatYearRange(project.startYear, project.endYear);
+      
+      const tTags = document.getElementById("hoverTags");
+      tTags.innerHTML = project.tags.map(t => `<div class="tooltip-tag">${t}</div>`).join('');
+      moveTooltip(e);
+    }
+    function moveTooltip(e) {
+      tooltip.style.left = e.pageX + 15 + "px";
+      tooltip.style.top = e.pageY + 15 + "px";
+    }
+    function hideTooltip() { tooltip.style.display = "none"; }
+
+    // RENDER TABLE CON OPEN LINK NERO
+    function renderTable(data) {
+      const tbody = document.getElementById("tableBody");
+      tbody.innerHTML = "";
+      data.forEach(p => {
+        tbody.innerHTML += `
+          <tr>
+            <td>
+              <div style="display: flex; gap: 24px;">
+                <img src="${p.image}" class="table-thumb">
+                <div style="display:flex; flex-direction:column; justify-content:center;">
+                  <div class="uppercase bold" style="font-size:12px;">${p.title}</div>
+                  <div style="margin-top:8px;">${formatYearRange(p.startYear, p.endYear)}</div>
+                </div>
+              </div>
+            </td>
+            <td style="padding-left: 32px; padding-right: 48px; line-height: 1.6; max-width: 400px;">
+              ${p.description}
+            </td>
+            <td class="uppercase">${p.tags[0] || ''}</td>
+            <td style="text-align: right;">
+              <a href="${p.projectUrl}" target="_blank" class="btn-solid" style="margin-left:auto;">OPEN LINK</a>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    // DRAWER CON OPEN LINK NERO
+    function selectProject(id) {
+      selectedId = id;
+      hideTooltip();
+      handleFilter(); 
+      
+      const p = projectsData.find(x => x.id === id);
+      const empty = document.getElementById("drawerEmpty");
+      const wrapper = document.getElementById("drawerContentWrapper");
+      
+      wrapper.classList.remove("visible");
+      empty.style.display = "none";
+      
+      setTimeout(() => {
+        wrapper.innerHTML = `
+          <div class="drawer-header">
+            <div class="uppercase bold" style="font-size:12px; line-height:1.3;">${p.title}</div>
+            <button class="icon-btn" style="width:24px; height:24px; flex-shrink:0;" onclick="closeDrawer()"><i data-lucide="x" style="width:16px;"></i></button>
+          </div>
+          <img src="${p.image}" class="drawer-img">
+          <div class="data-block">
+            <div class="data-label">Coverage Vector</div>
+            <div>${formatYearRange(p.startYear, p.endYear)}</div>
+          </div>
+          <div class="data-block">
+            <div class="data-label">Release Date</div>
+            <div>${p.releaseDate}</div>
+          </div>
+          <div class="data-block">
+            <div class="data-label">Description</div>
+            <div style="line-height: 1.5;">${p.description}</div>
+          </div>
+          <div class="data-block">
+            <div class="data-label">Categories</div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+              ${p.tags.map(t => `<span style="border: 1px solid #000000; padding: 4px 8px; text-transform: uppercase; font-size: 8px;">${t}</span>`).join('')}
+            </div>
+          </div>
+          <a href="${p.projectUrl}" target="_blank" class="btn-solid" style="width: 100%; margin-top: 32px;">OPEN LINK</a>
+        `;
+        lucide.createIcons();
+        wrapper.classList.add("visible");
+      }, 300);
+    }
+
+    function closeDrawer() {
+      selectedId = null;
+      const empty = document.getElementById("drawerEmpty");
+      const wrapper = document.getElementById("drawerContentWrapper");
+      wrapper.classList.remove("visible");
+      setTimeout(() => { empty.style.display = "flex"; wrapper.innerHTML = ""; }, 300);
+      handleFilter();
+    }
+
+    // CALCOLO POSIZIONE X CON MARGINE PROTETTIVO
+    function getX(year) { 
+      return (((year - START_YEAR) / TOTAL_SPAN) * currentTotalWidth) + PADDING_GLOBAL; 
+    }
+    
+    function setView(mode) {
+      document.getElementById("timelineView").style.display = mode === 'timeline' ? 'block' : 'none';
+      document.getElementById("tableView").style.display = mode === 'table' ? 'block' : 'none';
+      
+      document.getElementById("viewTimeline").classList.toggle("active", mode === 'timeline');
+      document.getElementById("viewTable").classList.toggle("active", mode === 'table');
+      
+      if(mode === 'timeline') setTimeout(resetView, 100);
+    }
+  </script>
 </body>
 </html>

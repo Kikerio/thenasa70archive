@@ -1,159 +1,115 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NASA 70 - Logo Animation</title>
-    <style>
-        /* TEMA E SETTINGS AVANZATI */
-        :root {
-            --space-black: #000000;
-            /* Curva Easy Ease ancora più estrema per massima fluidità */
-            --ease-extreme: cubic-bezier(0.16, 1, 0.3, 1);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NASA 70 — Boot Sequence</title>
+  <style>
+    /* RESET BASE */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    body {
+      background-color: #ffffff;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        body {
-            margin: 0;
-            background-color: var(--space-black);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
+    /* CONTENITORE ANIMAZIONE */
+    .logo-container-loader {
+      position: relative; 
+      width: 420px; 
+      height: 420px;
+      display: flex; 
+      justify-content: center; 
+      align-items: center;
+      /* Alla fine rimpicciolisce e sale per simulare l'ingresso nel sito */
+      animation: shrinkAndMoveLogo 1s cubic-bezier(0.16, 1, 0.3, 1) 3.5s forwards;
+    }
 
-        .logo-container {
-            position: relative;
-            width: 800px;
-            height: 800px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+    /* SCUDO BASE */
+    .shield-wrapper {
+      position: relative; 
+      width: 100%; 
+      height: 100%;
+      opacity: 0; 
+      transform: scale(0.85);
+      animation: shieldEntrance 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      will-change: transform, opacity;
+    }
 
-        /* IL WRAPPER PRINCIPALE CON LA MASCHERA */
-        .shield-wrapper {
-            position: relative;
-            width: 450px; 
-            height: 450px;
-            opacity: 0;
-            transform: scale(0.85);
-            animation: shieldEntrance 1.5s var(--ease-extreme) forwards;
-            will-change: transform, opacity;
-        }
+    .base-sfondo {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; object-fit: contain;
+    }
 
-        /* 1. SFONDO BLU (Base visibile) */
-        .base-sfondo {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: contain;
-        }
+    /* MASCHERA PER GLI ELEMENTI INTERNI (RAZZO, SCRITTE) */
+    .masked-elements {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      /* ATTENZIONE: Questo percorso funziona se logo_animation.html è nella root */
+      -webkit-mask-image: url('assets/imgs/logo_parts/sfondo.png');
+      -webkit-mask-size: contain; 
+      -webkit-mask-position: center; 
+      -webkit-mask-repeat: no-repeat;
+      mask-image: url('assets/imgs/logo_parts/sfondo.png');
+      mask-size: contain; 
+      mask-position: center; 
+      mask-repeat: no-repeat;
+    }
 
-        /* IL CONTENITORE MASCHERATO */
-        .masked-elements {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            /* La maschera usa lo scudo per nascondere ciò che sta fuori */
-            -webkit-mask-image: url('assets/logo_parts/sfondo.png');
-            -webkit-mask-size: contain;
-            -webkit-mask-position: center;
-            -webkit-mask-repeat: no-repeat;
-            mask-image: url('assets/logo_parts/sfondo.png');
-            mask-size: contain;
-            mask-position: center;
-            mask-repeat: no-repeat;
-        }
+    /* CLASSI ELEMENTI SINGOLI */
+    .logo-element {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      object-fit: contain; 
+      opacity: 0; 
+      will-change: transform, opacity;
+    }
 
-        /* CLASSE BASE PER GLI ELEMENTI INTERNI */
-        .element {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: contain;
-            opacity: 0;
-            will-change: transform, opacity;
-        }
+    /* TIMING DELLE ANIMAZIONI */
+    .razzo  { transform: translateY(100%);  animation: slideUp        1.5s cubic-bezier(0.16,1,0.3,1) 0.4s forwards; }
+    .nasa   { transform: translateY(15px);  animation: fadeUp         1.2s cubic-bezier(0.16,1,0.3,1) 1.2s forwards; }
+    .date-l { transform: translateY(15px);  animation: fadeUp         1.2s cubic-bezier(0.16,1,0.3,1) 1.4s forwards; }
+    /* Uso lo stesso asset 70.png ritagliando metà per il 7 e metà per lo 0 (se hai due file separati cambia gli src nell'html) */
+    .sette  { clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%);  transform: translateX(-40%); animation: slideFromLeft  1.2s cubic-bezier(0.16,1,0.3,1) 1.8s forwards; }
+    .zero   { clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%); transform: translateX(40%);  animation: slideFromRight 1.2s cubic-bezier(0.16,1,0.3,1) 1.8s forwards; }
 
-        /* 2. RAZZO */
-        .razzo {
-            transform: translateY(100%);
-            animation: slideUp 1.5s var(--ease-extreme) 0.4s forwards;
-        }
-
-        /* 3. LOGO NASA */
-        .nasa {
-            transform: translateY(15px);
-            animation: fadeUp 1.2s var(--ease-extreme) 1.2s forwards;
-        }
-
-        /* 4. DATE (1958 - 2028) */
-        .date {
-            transform: translateY(15px);
-            animation: fadeUp 1.2s var(--ease-extreme) 1.4s forwards;
-        }
-
-        /* 5. NUMERO 7 (Usiamo il file 70.png ma mostriamo solo il 50% di sinistra) */
-        .sette {
-            clip-path: polygon(0% 0%, 50% 0%, 50% 100%, 0% 100%);
-            transform: translateX(-40%);
-            animation: slideFromLeft 1.2s var(--ease-extreme) 1.8s forwards;
-        }
-
-        /* 6. NUMERO 0 (Usiamo lo stesso file 70.png ma mostriamo solo il 50% di destra) */
-        .zero {
-            clip-path: polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%);
-            transform: translateX(40%);
-            animation: slideFromRight 1.2s var(--ease-extreme) 1.8s forwards;
-        }
-
-
-        /* --- KEYFRAMES --- */
-        @keyframes shieldEntrance {
-            from { opacity: 0; transform: scale(0.85); }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(100%); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes slideFromLeft {
-            from { opacity: 0; transform: translateX(-40%); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-
-        @keyframes slideFromRight {
-            from { opacity: 0; transform: translateX(40%); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-    </style>
+    /* KEYFRAMES */
+    @keyframes shieldEntrance   { from { opacity:0; transform:scale(0.85); }  to { opacity:1; transform:scale(1); } }
+    @keyframes slideUp          { from { opacity:0; transform:translateY(100%); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeUp           { from { opacity:0; transform:translateY(15px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes slideFromLeft    { from { opacity:0; transform:translateX(-40%); } to { opacity:1; transform:translateX(0); } }
+    @keyframes slideFromRight   { from { opacity:0; transform:translateX(40%);  } to { opacity:1; transform:translateX(0); } }
+    
+    @keyframes shrinkAndMoveLogo {
+      0%   { transform: scale(1); opacity: 1; }
+      100% { transform: scale(0.15) translateY(-80vh); opacity: 0; } /* Spinge il logo in alto scomparendo */
+    }
+  </style>
 </head>
 <body>
 
-    <div class="logo-container">
-        <div class="shield-wrapper">
-            
-            <img src="assets/logo_parts/sfondo.png" class="base-sfondo" alt="Sfondo Blu">
-
-            <div class="masked-elements">
-                <img src="assets/logo_parts/razzo.png" class="element razzo" alt="Razzo">
-                <img src="assets/logo_parts/nasa.png" class="element nasa" alt="Logo NASA">
-                <img src="assets/logo_parts/date.png" class="element date" alt="Date">
-                
-                <img src="assets/logo_parts/70.png" class="element sette" alt="Numero 7">
-                <img src="assets/logo_parts/70.png" class="element zero" alt="Numero 0">
-            </div>
-
-        </div>
+  <div class="logo-container-loader">
+    <div class="shield-wrapper">
+      <img src="assets/imgs/logo_parts/sfondo.png" class="base-sfondo" alt="Sfondo">
+      <div class="masked-elements">
+        <img src="assets/imgs/logo_parts/razzo.png"  class="logo-element razzo"  alt="Razzo">
+        <img src="assets/imgs/logo_parts/nasa.png"   class="logo-element nasa"   alt="NASA">
+        <img src="assets/imgs/logo_parts/date.png"   class="logo-element date-l" alt="Date">
+        <img src="assets/imgs/logo_parts/70.png"     class="logo-element sette"  alt="7">
+        <img src="assets/imgs/logo_parts/70.png"     class="logo-element zero"   alt="0">
+      </div>
     </div>
+  </div>
+
+  <script>
+    // Aspetta 4.5 secondi (il tempo che finiscano tutte le animazioni) e poi cambia pagina
+    setTimeout(() => {
+      window.location.href = 'index.html';
+    }, 4500); 
+  </script>
 
 </body>
 </html>
